@@ -69,6 +69,6 @@ def test():
     ) == fa.random_data(32).hex()
     assert (
         "f23ad749f33066ff53d307914fbf5b21da9667c7e86ba247655c9490e9d94a7c"
-        == fa.generator.key.hex()
+        == fa.generator.K.hex()
     )
-    assert fa.generator.counter == 5
+    assert fa.generator.C == 5
