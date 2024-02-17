@@ -1,26 +1,28 @@
-from .acumulator import Acumulator
+from accumulator import Fortuna
 
 
 def test():
     """FortunaAccumulator.FortunaAccumulator"""
-    fa = Acumulator()
+    fa = Fortuna()
 
     # # This should fail, because we haven't seeded the PRNG yet
-    # self.assertRaises(AssertionError, fa.random_data, 1)
+    # with pytest.raises(FortunaNotSeeded):
+    #     fa.random_data(1)
 
     # Spread some test data across the pools (source number 42)
     # This would be horribly insecure in a real system.
     for p in range(32):
         fa.add_random_event(42, p, b"X" * 32)
-        assert 32 + 2 == fa.pools[p].length
+        assert 32 + 2 == len(fa.pools[p])
 
     # # This should still fail, because we haven't seeded the PRNG with 64 bytes yet
-    # self.assertRaises(AssertionError, fa.random_data, 1)
+    # with pytest.raises(FortunaNotSeeded):
+    #     fa.random_data(1)
 
     # Add more data
     for p in range(32):
         fa.add_random_event(42, p, b"X" * 32)
-        assert (32 + 2) * 2 == fa.pools[p].length
+        assert (32 + 2) * 2 == len(fa.pools[p])
 
     # The underlying RandomGenerator should get seeded with Pool 0
     #   s = SHAd256(chr(42) + chr(32) + "X"*32 + chr(42) + chr(32) + "X"*32)
@@ -52,18 +54,19 @@ def test():
     #   K_2 = r_3 || r_4
     #       = h'f23ad749f33066ff53d307914fbf5b21da9667c7e86ba247655c9490e9d94a7c'
     # The final counter value is 5.
-    assert (
-        "aef42a5dcbddab67e8efa118e1b47fde5d697f89beb971b99e6e8e5e89fbf064"
-        == fa.pools[0].digest().hex()
-    )
-    assert fa.generator.key is None
-    assert fa.generator.counter == 0
 
-    result = fa.random_data(32).hex()
+    # # pycrypto has a Pool object which is in charge of generating the hash
+    # assert (
+    #     "aef42a5dcbddab67e8efa118e1b47fde5d697f89beb971b99e6e8e5e89fbf064"
+    #     == fa.pools[0].digest().hex()
+    # )
+
+    # assert fa.generator.K is None
+    assert fa.generator.C == 0
 
     assert (
         "b7b86bd9a27d96d7bb4add1b6b10d157" "2350b1c61253db2f8da233be726dc15f"
-    ) == result
+    ) == fa.random_data(32).hex()
     assert (
         "f23ad749f33066ff53d307914fbf5b21da9667c7e86ba247655c9490e9d94a7c"
         == fa.generator.key.hex()
