@@ -5,23 +5,24 @@ MINPOOLSIZE = 64
 
 class Fortuna(object):
     def __init__(self):
-        self.P = [b''] * 32
+        self.pools = [bytearray() for i in range(32)]
         self.reseed_cnt = 0
         self.generator = Generator()
-        self.last_seed = None # to calculate time difference
+        self.last_seed = 0 # timestamp to calculate time difference
 
     def random_data(self, n: int):
         # n: Number of bytes of random data to generate
-        if len(self.P[0]) >= MINPOOLSIZE and (time - self.last_seed) > 0.1:
+        if len(self.pools[0]) >= MINPOOLSIZE and (time() - self.last_seed) > 0.1:
             self.reseed_cnt += 1
             s = bytearray()
             for i in range(32):
-                if self.reseedcnt % 2**i == 0:
-                    s += sha_double_256(self.P[i])
-                    del self.P[i][:]
+                if self.reseed_cnt % 2**i == 0:
+                    s += sha_double_256(self.pools[i])
+                    del self.pools[i][:]
             self.generator.reseed(s)
+            self.last_seed = time()
 
-        if self.reseedcnt == 0:
+        if self.reseed_cnt == 0:
             raise FortunaNotSeeded("Generate error, PRNG not seeded yet")
 
         return self.generator.pseudo_randomdata(n)
@@ -35,13 +36,13 @@ class Fortuna(object):
         assert 1 <= len(e) <= 32
         assert 0 <= s <= 255
         assert 0 <= i <= 31
-        self.accumulator.P[i] = self.accumulator.P[i] + s + bytes([len(e)]) + e
+        self.pools[i] += bytes([s, len(e)]) + e
 
     def write_seedfile(self, f):
         with open(f, 'wb') as fp:
             fp.write(self.randomdata(64))
 
-    def update_seedfile(self, f):
+    def update_seedfile(self, f): # TODO: for tests is better to accept abstract io.StringIO. Open file with open(.., '+'). Inspirado en la implementación en go
         s = open(f).read()
         assert len(s) == 64
         self.generator.reseed(s)
