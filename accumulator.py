@@ -1,14 +1,20 @@
 from time import time
+
 from generator import Generator, sha_double_256
 
 MINPOOLSIZE = 64
+
+
+class FortunaNotSeeded(Exception):
+    ...
+
 
 class Fortuna(object):
     def __init__(self):
         self.pools = [bytearray() for i in range(32)]
         self.reseed_cnt = 0
         self.generator = Generator()
-        self.last_seed = 0 # timestamp to calculate time difference
+        self.last_seed = 0  # timestamp to calculate time difference
 
     def random_data(self, n: int):
         # n: Number of bytes of random data to generate
@@ -39,12 +45,14 @@ class Fortuna(object):
         self.pools[i] += bytes([s, len(e)]) + e
 
     def write_seedfile(self, f):
-        with open(f, 'wb') as fp:
+        with open(f, "wb") as fp:
             fp.write(self.randomdata(64))
 
-    def update_seedfile(self, f): # TODO: for tests is better to accept abstract io.StringIO. Open file with open(.., '+'). Inspirado en la implementación en go
+    def update_seedfile(
+        self, f
+    ):  # TODO: for tests is better to accept abstract io.StringIO. Open file with open(.., '+'). Inspirado en la implementación en go
         s = open(f).read()
         assert len(s) == 64
         self.generator.reseed(s)
-        with open(f, 'wb') as fp:
+        with open(f, "wb") as fp:
             fp.write(self.randomdata(64))
