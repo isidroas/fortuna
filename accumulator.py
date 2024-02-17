@@ -26,7 +26,7 @@ class Fortuna(object):
 
         return self.generator.pseudo_randomdata(n)
 
-    def add_random_event(self, s, i, e):
+    def add_random_event(self, s: int, i: int, e: bytes):
         """
         s: Source number in range(256)
         i: Pool number in range(32)
@@ -35,7 +35,7 @@ class Fortuna(object):
         assert 1 <= len(e) <= 32
         assert 0 <= s <= 255
         assert 0 <= i <= 31
-        self.accumulator.P[i] = self.accumulator.P[i] + s + len(e).to_bytes(1, 'big') + e
+        self.accumulator.P[i] = self.accumulator.P[i] + s + bytes([len(e)]) + e
 
     def write_seedfile(self, f):
         with open(f, 'wb') as fp:
