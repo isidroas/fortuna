@@ -19,6 +19,7 @@ class Generator(object):
     def __init__(self):
         self.K = b"\x00" * 32
         self.C = 0
+        # TODO: rename K->key, C->counter like pycrypto
 
     def reseed(self, s: bytes):
         """
