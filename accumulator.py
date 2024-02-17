@@ -1,36 +1,41 @@
-from hashlib import sha256
-from Crypto.Cipher import AES
-import math
-
-from generator import Generator
+from time import time
+from generator import Generator, sha_double_256
 
 MINPOOLSIZE = 64
 
-class Accumulator(object):
+class Fortuna(object):
     def __init__(self):
         self.P = [b''] * 32
-        self.reseedcnt = 0
+        self.reseed_cnt = 0
         self.generator = Generator()
-        self.last_seed = 0
+        self.last_seed = None # to calculate time difference
 
-    def randomdata(self, n):
+    def random_data(self, n: int):
         # n: Number of bytes of random data to generate
-        if len(self.P[0]) >= MINPOOLSIZE and self.last_seed > 100:
-            self.reseedcnt += 1
-            s = b''
+        if len(self.P[0]) >= MINPOOLSIZE and (time - self.last_seed) > 0.1:
+            self.reseed_cnt += 1
+            s = bytearray()
             for i in range(32):
-                if 2**i % self.reseedcnt == 0:
-                    # XXX: Is this correct?
-                    s += sha256(self.P[i]).digest()
-                    self.P[i] = b''
+                if self.reseedcnt % 2**i == 0:
+                    s += sha_double_256(self.P[i])
+                    del self.P[i][:]
             self.generator.reseed(s)
 
-        # XXX: FIX here
-        # if self.reseedcnt == 0:
-        #     print("Generate error, PRNG not seeded yet")
-        #     raise
+        if self.reseedcnt == 0:
+            raise FortunaNotSeeded("Generate error, PRNG not seeded yet")
 
         return self.generator.pseudo_randomdata(n)
+
+    def add_random_event(self, s, i, e):
+        """
+        s: Source number in range(256)
+        i: Pool number in range(32)
+        e: Event data
+        """
+        assert 1 <= len(e) <= 32
+        assert 0 <= s <= 255
+        assert 0 <= i <= 31
+        self.accumulator.P[i] = self.accumulator.P[i] + s + len(e).to_bytes(1, 'big') + e
 
     def write_seedfile(self, f):
         with open(f, 'wb') as fp:
@@ -42,9 +47,3 @@ class Accumulator(object):
         self.generator.reseed(s)
         with open(f, 'wb') as fp:
             fp.write(self.randomdata(64))
-        
-
-a = Accumulator()
-print(a.randomdata((4)))
-print(a.randomdata((4)))
-print(a.randomdata((4)))
