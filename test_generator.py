@@ -1,11 +1,15 @@
 from generator import Generator
+import pytest
 
 
 def test():
-    """ "
+    """"
     test copied from https://github.com/pycrypto/pycrypto/blob/65b43bd4ffe2a48bdedae986b1a291f5a2cc7df7/lib/Crypto/SelfTest/Random/Fortuna/test_FortunaGenerator.py#L42
     """
     g = Generator()
+
+    # with pytest.raises(FortunaNotInitError):
+    #     g.generate_blocks()
 
     g.reseed(b"Hello")
     assert g.K == bytes.fromhex(
