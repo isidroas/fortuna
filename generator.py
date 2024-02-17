@@ -5,6 +5,7 @@ from cryptography.hazmat.primitives import ciphers
 
 
 def encrypt(key: bytes, c: int):
+    # TODO: separate construction and encryption to save time in key scheduling?
     cipher = ciphers.Cipher(ciphers.algorithms.AES(key), mode=ciphers.modes.ECB())
     encryptor = cipher.encryptor()
     return encryptor.update(c.to_bytes(16, "little"))
