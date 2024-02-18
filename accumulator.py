@@ -1,9 +1,12 @@
 from time import time
 
-from generator import Generator, sha_double_256, FortunaNotSeeded
+from generator import Generator, sha_double_256
 
 MINPOOLSIZE = 64
 
+
+class FortunaSeedFileError(Exception):
+    ...
 
 
 class Fortuna(object):
@@ -42,15 +45,16 @@ class Fortuna(object):
         assert 0 <= i <= 31
         self.pools[i] += bytes([s, len(e)]) + e
 
-    def write_seedfile(self, f):
-        with open(f, "wb") as fp:
-            fp.write(self.randomdata(64))
+    def write_seed_file(self):
+        # with open(f, "wb") as fp:
+        self.seed_file.write(self.randomdata(64))
 
-    def update_seedfile(
-        self, f
-    ):  # TODO: for tests is better to accept abstract io.StringIO. Open file with open(.., '+'). Inspirado en la implementación en go
-        s = open(f).read()
-        assert len(s) == 64
+    def update_seed_file(self):
+        self.seed_file.seek(0)
+        s = self.seed_file.read()
+        if len(s) != 64:
+            msg = "file size is %d instead of 64" % len(s)
+            raise FortunaSeedFileError(msg)
         self.generator.reseed(s)
-        with open(f, "wb") as fp:
-            fp.write(self.randomdata(64))
+        self.seed_file.seek(0)
+        self.seed_file.write(self.random_data(64))
