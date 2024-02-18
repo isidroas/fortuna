@@ -1,12 +1,9 @@
 from time import time
 
-from generator import Generator, sha_double_256
+from generator import Generator, sha_double_256, FortunaNotSeeded
 
 MINPOOLSIZE = 64
 
-
-class FortunaNotSeeded(Exception):
-    ...
 
 
 class Fortuna(object):
@@ -28,8 +25,9 @@ class Fortuna(object):
             self.generator.reseed(s)
             self.last_seed = time()
 
-        if self.reseed_cnt == 0:
-            raise FortunaNotSeeded("Generate error, PRNG not seeded yet")
+        # # commented because the exception will be already raised in generator.pseudo_randomdata
+        # if self.reseed_cnt == 0:
+        #     raise FortunaNotSeeded("Generate error, PRNG not seeded yet")
 
         return self.generator.pseudo_randomdata(n)
 

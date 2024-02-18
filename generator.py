@@ -3,6 +3,8 @@ from hashlib import sha256
 
 from cryptography.hazmat.primitives import ciphers
 
+class FortunaNotSeeded(Exception):
+    ...
 
 def encrypt(key: bytes, c: int):
     # TODO: separate construction and encryption to save time in key scheduling?
@@ -33,6 +35,8 @@ class Generator(object):
         """
         k: Nmber of blocks to generate
         """
+        if self.C == 0:
+            raise FortunaNotSeeded("Generate error, PRNG not seeded yet")
         r = bytearray()
         for i in range(k):
             r += encrypt(self.K, self.C)

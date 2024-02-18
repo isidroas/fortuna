@@ -1,13 +1,14 @@
-from accumulator import Fortuna
+import pytest
+from accumulator import Fortuna, FortunaNotSeeded
 
 
 def test():
     """FortunaAccumulator.FortunaAccumulator"""
     fa = Fortuna()
 
-    # # This should fail, because we haven't seeded the PRNG yet
-    # with pytest.raises(FortunaNotSeeded):
-    #     fa.random_data(1)
+    # This should fail, because we haven't seeded the PRNG yet
+    with pytest.raises(FortunaNotSeeded):
+        fa.random_data(1)
 
     # Spread some test data across the pools (source number 42)
     # This would be horribly insecure in a real system.
@@ -15,9 +16,9 @@ def test():
         fa.add_random_event(42, p, b"X" * 32)
         assert 32 + 2 == len(fa.pools[p])
 
-    # # This should still fail, because we haven't seeded the PRNG with 64 bytes yet
-    # with pytest.raises(FortunaNotSeeded):
-    #     fa.random_data(1)
+    # This should still fail, because we haven't seeded the PRNG with 64 bytes yet
+    with pytest.raises(FortunaNotSeeded):
+        fa.random_data(1)
 
     # Add more data
     for p in range(32):

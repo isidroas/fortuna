@@ -1,4 +1,4 @@
-from generator import Generator
+from generator import Generator, FortunaNotSeeded
 import pytest
 
 
@@ -8,8 +8,8 @@ def test():
     """
     g = Generator()
 
-    # with pytest.raises(FortunaNotInitError):
-    #     g.generate_blocks()
+    with pytest.raises(FortunaNotSeeded):
+        g.generate_blocks(1)
 
     g.reseed(b"Hello")
     assert g.K == bytes.fromhex(
