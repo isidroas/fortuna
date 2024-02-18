@@ -1,3 +1,5 @@
+from io import IOBase
+from pathlib import Path
 from time import time
 
 from generator import Generator, sha_double_256
@@ -10,11 +12,19 @@ class FortunaSeedFileError(Exception):
 
 
 class Fortuna(object):
-    def __init__(self):
+    def __init__(self, seed_file: IOBase | Path | None = None):
         self.pools = [bytearray() for i in range(32)]
         self.reseed_cnt = 0
         self.generator = Generator()
         self.last_seed = 0  # timestamp to calculate time difference
+
+        if seed_file is None:
+            self.seed_file = None
+        elif isinstance(seed_file, IOBase):
+            self.seed_file = seed_file
+        else:
+            self.seed_file = open(seed_file, "bw+")
+        # TODO: call update_seed_file if not empty. It could be validated in a test
 
     def random_data(self, n: int):
         # n: Number of bytes of random data to generate
@@ -46,8 +56,7 @@ class Fortuna(object):
         self.pools[i] += bytes([s, len(e)]) + e
 
     def write_seed_file(self):
-        # with open(f, "wb") as fp:
-        self.seed_file.write(self.randomdata(64))
+        self.seed_file.write(self.random_data(64))
 
     def update_seed_file(self):
         self.seed_file.seek(0)
