@@ -23,4 +23,4 @@ while True:
     fortuna.add_random_event(0, 0, char.encode())
     fortuna.add_random_event(0, 0, now.microsecond.to_bytes(20, 'little') )
 
-fortna.write_seed_file()
+fortuna.write_seed_file()
