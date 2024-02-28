@@ -1,18 +1,17 @@
-import sys
-import time
 import contextlib
 import enum
+import sys
+import termios
+import tty
+import cmd
 from datetime import datetime
+import readline
 
 
 class Source(enum.IntEnum):
     TIMESTAMP = 0
     KEY_VALUE = 1
 
-
-# source: https://stackoverflow.com/questions/3670323/setting-smaller-buffer-size-for-sys-stdin#answer-34123854
-import tty
-import termios
 
 from accumulator import Fortuna
 
@@ -26,45 +25,63 @@ pool_counter = {
 
 @contextlib.contextmanager
 def cbreak_mode():
+    # source: https://stackoverflow.com/questions/3670323/setting-smaller-buffer-size-for-sys-stdin#answer-34123854
+    print("Send SIGINT (Ctrl+c) to exit")
     mode = tty.setcbreak(sys.stdin.fileno())
     yield
     termios.tcsetattr(sys.stdin.fileno(), termios.TCSAFLUSH, mode)
 
 
-def add_entropy(timestamp=True, add_char=True):
-    print("Send SIGINT (Ctrl+c) to stop adding entropy")
+def add_entropy(source=Source.KEY_VALUE):
     with cbreak_mode():
         while True:
             try:
                 char = sys.stdin.read(1)
             except KeyboardInterrupt:
                 break
-            if add_char:
+            if source is Source.KEY_VALUE:
                 print("key: {!r}".format(char))
                 fortuna.add_random_event(
                     Source.KEY_VALUE, pool_counter[Source.KEY_VALUE], char.encode()
                 )
                 pool_counter[Source.KEY_VALUE] += 1
-            if timestamp:
+            elif source is Source.TIMESTAMP:
                 now = datetime.now()
                 print("timestamp: {:%H:%M:%S.%f}".format(now))
                 fortuna.add_random_event(
                     Source.TIMESTAMP,
                     pool_counter[Source.TIMESTAMP],
-                    now.microsecond.to_bytes(20, "little"),
+                    now.microsecond.to_bytes(20, "little"), # log2(1e6) ≅ 20
                 )
                 pool_counter[Source.TIMESTAMP] += 1
 
+        # TODO: call add_random_event here, only once?
 
-def get_random(n=8):
-    data = fortuna.random_data(n)
-    print("0x%s" % data.hex().upper())
+
+class Cmd(cmd.Cmd):
+    def do_random(self, arg):
+        nbytes = int(arg) if arg else 8
+        data = fortuna.random_data(nbytes)
+        print("0x%s" % data.hex().upper())
+
+    def do_add_entropy(self, arg):
+        source = Source[arg.upper()] if arg else Source.KEY_VALUE
+        add_entropy(source)
+
+    def complete_add_entropy(self, text, line, begidx, endidx):
+        if not text:
+            return ['key_value', 'timestamp']
+        elif text in 'key_value':
+            return ['key_value']
+        elif text in 'timestamp':
+            return ['timestamp']
+        return []
+
 
 
 if __name__ == "__main__":
-    add_entropy()
-    get_random()
-    fortuna.update_seed_file()
-    test = input("press some key: ")
-    print(test)
+    # add_entropy()
+    # add_entropy(Source.TIMESTAMP)
+    # fortuna.update_seed_file()
+    Cmd().cmdloop()
     fortuna.write_seed_file()  # TODO: handle NotSeeded
