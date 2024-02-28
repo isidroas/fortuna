@@ -26,7 +26,7 @@ class Fortuna(object):
         elif isinstance(seed_file, IOBase):
             self.seed_file = seed_file
         else:
-            self.seed_file = open(seed_file, "bw+")
+            self.seed_file = open(seed_file, "br+")
 
         if self.seed_file is not None:
             try:
@@ -43,6 +43,8 @@ class Fortuna(object):
                 if self.reseed_cnt % 2**i == 0:
                     s += sha_double_256(self.pools[i])
                     del self.pools[i][:]
+                else:
+                    break # optimization sugested by the book
             self.generator.reseed(s)
             self.last_seed = time()
 
@@ -62,8 +64,13 @@ class Fortuna(object):
         assert 0 <= s <= 255
         assert 0 <= i <= 31
         self.pools[i] += bytes([s, len(e)]) + e
+        # not doing the hash here:
+        #  x it is a waste of memory
+        #  ✓ save time to entropy sources, which are typically real-time drivers
+        #  ✓ simpler because you don't have to maintain a counter, just do `len(pool)`
 
     def write_seed_file(self):
+        self.seed_file.seek(0)
         self.seed_file.write(self.random_data(64))
 
     def update_seed_file(self):
