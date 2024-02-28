@@ -10,6 +10,9 @@ MINPOOLSIZE = 64
 class FortunaSeedFileError(Exception):
     ...
 
+class FortunaSeedFileEmpty(FortunaSeedFileError):
+    ...
+
 
 class Fortuna(object):
     def __init__(self, seed_file: IOBase | Path | None = None):
@@ -24,7 +27,12 @@ class Fortuna(object):
             self.seed_file = seed_file
         else:
             self.seed_file = open(seed_file, "bw+")
-        # TODO: call update_seed_file if not empty. It could be validated in a test
+
+        if self.seed_file is not None:
+            try:
+                self.update_seed_file()
+            except FortunaSeedFileEmpty:
+                print('given seed file is empty')
 
     def random_data(self, n: int):
         # n: Number of bytes of random data to generate
@@ -61,7 +69,9 @@ class Fortuna(object):
     def update_seed_file(self):
         self.seed_file.seek(0)
         s = self.seed_file.read()
-        if len(s) != 64:
+        if len(s) == 0:
+            raise FortunaSeedFileEmpty()
+        elif len(s) != 64:
             msg = "file size is %d instead of 64" % len(s)
             raise FortunaSeedFileError(msg)
         self.generator.reseed(s)

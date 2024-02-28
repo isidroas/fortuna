@@ -1,5 +1,6 @@
 import pytest
-from accumulator import Fortuna, FortunaNotSeeded
+from accumulator import Fortuna
+from generator import FortunaNotSeeded
 
 
 def test():
