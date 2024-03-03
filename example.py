@@ -4,6 +4,7 @@ import sys
 import termios
 import tty
 import cmd
+import textwrap
 from datetime import datetime
 import readline
 
@@ -26,9 +27,11 @@ pool_counter = {
 
 @contextlib.contextmanager
 def cbreak_mode():
-    # source: https://stackoverflow.com/questions/3670323/setting-smaller-buffer-size-for-sys-stdin#answer-34123854
+    """
+    source https://stackoverflow.com/a/42029045/16926605
+    """
     print("Send SIGINT (Ctrl+c) to exit")
-    if sys.version_info < (3,12):
+    if sys.version_info < (3, 12):
         mode = tty.tcgetattr(sys.stdin.fileno())
         tty.setcbreak(sys.stdin.fileno())
     else:
@@ -89,6 +92,12 @@ class Cmd(cmd.Cmd):
 
     def do_EOF(self, arg):
         return True
+
+    def do_print_seed_file(self, arg):
+        file = fortuna.seed_file
+        file.seek(0)
+        for line in textwrap.wrap(file.read().hex(' ', 2).upper(), width=40):
+            print(line)
 
     def complete_add_entropy(self, text, line, begidx, endidx):
         if not text:

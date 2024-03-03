@@ -4,6 +4,7 @@ import pytest
 
 from accumulator import Fortuna, FortunaSeedFileError
 from generator import FortunaNotSeeded
+
 # TODO: make test more unitary. Create fixture of Fortuna with preadded entrypy
 
 
@@ -22,6 +23,7 @@ def test():
     assert seed_file.getvalue() != b"\x00" * 64
     assert len(seed_file.getvalue()) == 64
 
+
 def test_write():
     """
     test that it is called to seek(0)
@@ -33,19 +35,82 @@ def test_write():
     assert seed_file.getvalue() != b"\x00" * 64
     assert len(seed_file.getvalue()) == 64
 
+
 def test_autoupdate_if_not_empty():
     f = Fortuna(seed_file=io.BytesIO())
 
     with pytest.raises(FortunaNotSeeded):
         f.generator.generate_blocks(1)
 
-    f = Fortuna(seed_file=io.BytesIO(b'\x00'*64))
+    f = Fortuna(seed_file=io.BytesIO(b"\x00" * 64))
 
-    f.generator.generate_blocks(1) # it does not raise error
+    f.generator.generate_blocks(1)  # it does not raise error
 
-def test_real_file_is_created(tmp_path):
-    Fortuna(seed_file=tmp_path/ 'seed_file')
-    assert tmp_path.exists()
+
+@pytest.fixture
+def seed_file(tmp_path):
+    return tmp_path / "seed_file"
+
+
+@pytest.fixture
+def seed_file_empty(seed_file):
+    seed_file.touch()
+    return seed_file
+
+
+@pytest.fixture
+def seed_file_filled(seed_file):
+    seed_file.write_bytes(b"\x00" * 64)
+    return seed_file
+
+
+def add_entropy(fortuna: Fortuna):
+    fortuna.add_random_event(0, 0, b"\x00" * 32)
+    fortuna.add_random_event(0, 0, b"\x00" * 32)
+
+
+def common(fortuna, file):
+    add_entropy(fortuna)
+    fortuna.write_seed_file()
+    fortuna.seed_file.flush()
+    assert len(file.read_bytes()) == 64
+
+    fortuna.update_seed_file()
+    fortuna.seed_file.flush()
+    assert len(file.read_bytes()) == 64
+
+
+def test_real_file_is_created_without_entropy(seed_file):
+    fortuna = Fortuna(seed_file=seed_file)
+    assert seed_file.read_text() == ""
+    common(fortuna, seed_file)
+
+
+def test_real_file_empty(seed_file_empty):
+    fortuna = Fortuna(seed_file=seed_file_empty)
+    assert seed_file_empty.read_text() == ""
+
+    with pytest.raises(FortunaNotSeeded):
+        fortuna.random_data(1)
+
+    add_entropy(fortuna)
+    fortuna.write_seed_file()
+    fortuna.seed_file.flush()
+    assert len(seed_file_empty.read_bytes()) == 64
+
+    fortuna.update_seed_file()
+    fortuna.seed_file.flush()
+    assert len(seed_file_empty.read_bytes()) == 64
+
+
+def test_real_file(seed_file_filled):
+    fortuna = Fortuna(seed_file=seed_file_filled)
+
+    # check does not raise error
+    fortuna.random_data(1)
+
+    common(fortuna, seed_file_filled)
+
 
 # def test_real_file(tmp_path):
 #     """

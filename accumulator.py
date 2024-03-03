@@ -7,11 +7,10 @@ from generator import Generator, sha_double_256
 MINPOOLSIZE = 64
 
 
-class FortunaSeedFileError(Exception):
-    ...
+class FortunaSeedFileError(Exception): ...
 
-class FortunaSeedFileEmpty(FortunaSeedFileError):
-    ...
+
+class FortunaSeedFileEmpty(FortunaSeedFileError): ...
 
 
 class Fortuna(object):
@@ -26,13 +25,19 @@ class Fortuna(object):
         elif isinstance(seed_file, IOBase):
             self.seed_file = seed_file
         else:
-            self.seed_file = open(seed_file, "ba+") # if using r+, the stream is posicioned at the end (depends on platforms), but the file is not created if it does't exist. I would need `flags = O_RDWR | O_CREAT`
+            if not isinstance(seed_file, Path):
+                seed_file = Path(seed_file)
+            if not seed_file.exists():
+                seed_file.touch()
+            self.seed_file = open(
+                seed_file, "r+b"
+            )  # if using r+, the stream is posicioned at the end (depends on platforms), but the file is not created if it does't exist. I would need `flags = O_RDWR | O_CREAT`
 
         if self.seed_file is not None:
             try:
                 self.update_seed_file()
             except FortunaSeedFileEmpty:
-                print('given seed file is empty')
+                print("given seed file is empty")
 
     def random_data(self, n: int):
         # n: Number of bytes of random data to generate
@@ -44,7 +49,7 @@ class Fortuna(object):
                     s += sha_double_256(self.pools[i])
                     del self.pools[i][:]
                 else:
-                    break # optimization sugested by the book
+                    break  # optimization sugested by the book
             self.generator.reseed(s)
             self.last_seed = time()
 

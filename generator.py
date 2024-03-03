@@ -3,8 +3,9 @@ from hashlib import sha256
 
 from cryptography.hazmat.primitives import ciphers
 
-class FortunaNotSeeded(Exception):
-    ...
+
+class FortunaNotSeeded(Exception): ...
+
 
 def encrypt(key: bytes, c: int):
     # TODO: separate construction and encryption to save time in key scheduling?
