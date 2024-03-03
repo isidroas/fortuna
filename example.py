@@ -80,8 +80,6 @@ class Cmd(cmd.Cmd):
 
 
 if __name__ == "__main__":
-    # add_entropy()
-    # add_entropy(Source.TIMESTAMP)
     # fortuna.update_seed_file()
     Cmd().cmdloop()
     fortuna.write_seed_file()  # TODO: handle NotSeeded
