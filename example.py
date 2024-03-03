@@ -14,6 +14,7 @@ class Source(enum.IntEnum):
 
 
 from accumulator import Fortuna
+from generator import FortunaNotSeeded
 
 fortuna = Fortuna(seed_file="./seed_file")
 
@@ -60,11 +61,21 @@ def add_entropy(source=Source.KEY_VALUE):
 
 class Cmd(cmd.Cmd):
     def do_random(self, arg):
+        """
+        random <n bytes>
+        """
         nbytes = int(arg) if arg else 8
-        data = fortuna.random_data(nbytes)
-        print("0x%s" % data.hex().upper())
+        try:
+            data = fortuna.random_data(nbytes)
+        except FortunaNotSeeded:
+            print('Can not generate random data. Add entropy first')
+        else:
+            print("0x%s" % data.hex().upper())
 
     def do_add_entropy(self, arg):
+        """
+        add_entropy [timestamp|key_value]
+        """
         source = Source[arg.upper()] if arg else Source.KEY_VALUE
         add_entropy(source)
 
