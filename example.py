@@ -28,7 +28,11 @@ pool_counter = {
 def cbreak_mode():
     # source: https://stackoverflow.com/questions/3670323/setting-smaller-buffer-size-for-sys-stdin#answer-34123854
     print("Send SIGINT (Ctrl+c) to exit")
-    mode = tty.setcbreak(sys.stdin.fileno())
+    if sys.version_info < (3,12):
+        mode = tty.tcgetattr(sys.stdin.fileno())
+        tty.setcbreak(sys.stdin.fileno())
+    else:
+        mode = tty.setcbreak(sys.stdin.fileno())
     yield
     termios.tcsetattr(sys.stdin.fileno(), termios.TCSAFLUSH, mode)
 
@@ -46,6 +50,7 @@ def add_entropy(source=Source.KEY_VALUE):
                     Source.KEY_VALUE, pool_counter[Source.KEY_VALUE], char.encode()
                 )
                 pool_counter[Source.KEY_VALUE] += 1
+                pool_counter[Source.KEY_VALUE] %= 32
             elif source is Source.TIMESTAMP:
                 now = datetime.now()
                 print("timestamp: {:%H:%M:%S.%f}".format(now))
@@ -55,6 +60,7 @@ def add_entropy(source=Source.KEY_VALUE):
                     now.microsecond.to_bytes(20, "little"),  # log2(1e6) ≅ 20
                 )
                 pool_counter[Source.TIMESTAMP] += 1
+                pool_counter[Source.TIMESTAMP] %= 32
 
         # TODO: call add_random_event here, only once?
 
