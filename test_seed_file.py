@@ -43,6 +43,10 @@ def test_autoupdate_if_not_empty():
 
     f.generator.generate_blocks(1) # it does not raise error
 
+def test_real_file_is_created(tmp_path):
+    Fortuna(seed_file=tmp_path/ 'seed_file')
+    assert tmp_path.exists()
+
 # def test_real_file(tmp_path):
 #     """
 #     file is overwrited in each updated, not appended

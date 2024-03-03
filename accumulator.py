@@ -26,7 +26,7 @@ class Fortuna(object):
         elif isinstance(seed_file, IOBase):
             self.seed_file = seed_file
         else:
-            self.seed_file = open(seed_file, "br+")
+            self.seed_file = open(seed_file, "ba+") # if using r+, the stream is posicioned at the end (depends on platforms), but the file is not created if it does't exist. I would need `flags = O_RDWR | O_CREAT`
 
         if self.seed_file is not None:
             try:
