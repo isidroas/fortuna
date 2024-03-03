@@ -52,7 +52,7 @@ def add_entropy(source=Source.KEY_VALUE):
                 fortuna.add_random_event(
                     Source.TIMESTAMP,
                     pool_counter[Source.TIMESTAMP],
-                    now.microsecond.to_bytes(20, "little"), # log2(1e6) ≅ 20
+                    now.microsecond.to_bytes(20, "little"),  # log2(1e6) ≅ 20
                 )
                 pool_counter[Source.TIMESTAMP] += 1
 
@@ -60,6 +60,8 @@ def add_entropy(source=Source.KEY_VALUE):
 
 
 class Cmd(cmd.Cmd):
+    prompt = "(fortuna) "
+
     def do_random(self, arg):
         """
         random <n bytes>
@@ -68,7 +70,7 @@ class Cmd(cmd.Cmd):
         try:
             data = fortuna.random_data(nbytes)
         except FortunaNotSeeded:
-            print('Can not generate random data. Add entropy first')
+            print("Can not generate random data. Add entropy first")
         else:
             print("0x%s" % data.hex().upper())
 
@@ -79,18 +81,23 @@ class Cmd(cmd.Cmd):
         source = Source[arg.upper()] if arg else Source.KEY_VALUE
         add_entropy(source)
 
+    def do_EOF(self, arg):
+        return True
+
     def complete_add_entropy(self, text, line, begidx, endidx):
         if not text:
-            return ['key_value', 'timestamp']
-        elif text in 'key_value':
-            return ['key_value']
-        elif text in 'timestamp':
-            return ['timestamp']
+            return ["key_value", "timestamp"]
+        elif text in "key_value":
+            return ["key_value"]
+        elif text in "timestamp":
+            return ["timestamp"]
         return []
-
 
 
 if __name__ == "__main__":
     # fortuna.update_seed_file()
     Cmd().cmdloop()
-    fortuna.write_seed_file()  # TODO: handle NotSeeded
+    try:
+        fortuna.write_seed_file()  # TODO: handle NotSeeded
+    except FortunaNotSeeded:
+        print("not writing seed file")
