@@ -30,7 +30,7 @@ def _get_templates(n_pools, n_sources, width):
     '{: <1}: 0x{: <7}'
     """
 
-    pointer_template = '<- {: <%d}' % (2*n_sources  -1)
+    pointer_template = '<- {: <%d}' %  len(','.join(' ' * n_sources))
     template = '{: <%d}: 0x' % (2 if n_pools>10 else 1)
     template += '{: <%d}' % ( width - len(template.format('')) - len(pointer_template.format('')))
 
@@ -64,15 +64,16 @@ def test_pools():
 def test_source_pointer():
     res = format_pools(pools, [1, 0], width=17)
     assert res == """\
-0: 0x00       <- 1
-1: 0x0102     <- 0
+0: 0x00    <- 1  
+1: 0x0102  <- 0  
 """
 
 def test_source_pointer_overlaped():
-    res = format_pools(pools, [1, 1])
+    res = format_pools(pools, [1, 1], width=17)
+    print(res)
     assert res == """\
-0: 0x00
-1: 0x0102     <- 0,1
+0: 0x00    
+1: 0x0102  <- 0,1
 """
 
 def test_overflow():
