@@ -90,6 +90,9 @@ class Cmd(cmd.Cmd):
         source = Source[arg.upper()] if arg else Source.KEY_VALUE
         add_entropy(source)
 
+    def do_update_seed_file(self, arg):
+        fortuna.update_seed_file()
+
     def do_EOF(self, arg):
         return True
 
