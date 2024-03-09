@@ -12,10 +12,10 @@ def test():
         g.generate_blocks(1)
 
     g.reseed(b"Hello")
-    assert g.K == bytes.fromhex(
+    assert g.key == bytes.fromhex(
         "0ea6919d4361551364242a4ba890f8f073676e82cf1a52bb880f7e496648b565"
     )
-    assert g.C == 1
+    assert g.counter == 1
 
     assert g.pseudo_randomdata(32) == bytes.fromhex(
         "7cbe2c17684ac223d08969ee8b565616"  # counter = 1
@@ -23,8 +23,8 @@ def test():
     )
 
     # Meanwhile, the generator will have re-keyed itself and incremented its counter
-    assert g.K == bytes.fromhex(
+    assert g.key == bytes.fromhex(
         "33a1bb21987859caf2bbfc5615bef56d"  # counter=3
         "e6b71ff9f37112d0c193a135160862b7"  # counter=4
     )
-    assert g.C == 5
+    assert g.counter == 5

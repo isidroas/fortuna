@@ -20,8 +20,8 @@ def sha_double_256(data):
 
 class Generator(object):
     def __init__(self):
-        self.K = b"\x00" * 32
-        self.C = 0
+        self.key = b"\x00" * 32
+        self.counter = 0
         # TODO: rename K->key, C->counter like pycrypto
 
     def reseed(self, s: bytes):
@@ -29,19 +29,19 @@ class Generator(object):
         G: Generator state, G = (K, C)
         s: New or additional seed
         """
-        self.K = sha_double_256(self.K + s)
-        self.C += 1
+        self.key = sha_double_256(self.key + s)
+        self.counter += 1
 
     def generate_blocks(self, k: int):
         """
         k: Nmber of blocks to generate
         """
-        if self.C == 0:
+        if self.counter == 0:
             raise FortunaNotSeeded("Generate error, PRNG not seeded yet")
         r = bytearray()
         for i in range(k):
-            r += encrypt(self.K, self.C)
-            self.C += 1
+            r += encrypt(self.key, self.counter)
+            self.counter += 1
         return r
 
     def pseudo_randomdata(self, n: int):
@@ -50,5 +50,5 @@ class Generator(object):
         """
         assert 0 <= n <= 2**20
         r = self.generate_blocks(math.ceil(n / 16))[:n]
-        self.K = self.generate_blocks(2)
+        self.key = self.generate_blocks(2)
         return r

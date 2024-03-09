@@ -63,14 +63,14 @@ def test():
     #     == fa.pools[0].digest().hex()
     # )
 
-    # assert fa.generator.K is None
-    assert fa.generator.C == 0
+    # assert fa.generator.key is None
+    assert fa.generator.counter == 0
 
     assert (
         "b7b86bd9a27d96d7bb4add1b6b10d157" "2350b1c61253db2f8da233be726dc15f"
     ) == fa.random_data(32).hex()
     assert (
         "f23ad749f33066ff53d307914fbf5b21da9667c7e86ba247655c9490e9d94a7c"
-        == fa.generator.K.hex()
+        == fa.generator.key.hex()
     )
-    assert fa.generator.C == 5
+    assert fa.generator.counter == 5
