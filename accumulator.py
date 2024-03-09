@@ -1,3 +1,5 @@
+import logging
+
 from io import IOBase
 from pathlib import Path
 from time import time
@@ -6,6 +8,7 @@ from generator import Generator, sha_double_256
 
 MINPOOLSIZE = 64
 
+LOG= logging.getLogger(__name__)
 
 class FortunaSeedFileError(Exception): ...
 
@@ -29,15 +32,16 @@ class Fortuna(object):
                 seed_file = Path(seed_file)
             if not seed_file.exists():
                 seed_file.touch()
+                LOG.info('Created seed file "%s"', seed_file)
             self.seed_file = open(
                 seed_file, "r+b"
-            )  # if using r+, the stream is posicioned at the end (depends on platforms), but the file is not created if it does't exist. I would need `flags = O_RDWR | O_CREAT`
+            )  # if using r+, the stream is positioned at the end (depends on platforms), but the file is not created if it does't exist. I would need `flags = O_RDWR | O_CREAT`
 
         if self.seed_file is not None:
             try:
                 self.update_seed_file()
             except FortunaSeedFileEmpty:
-                print("given seed file is empty")
+                LOG.info('seed file ("%s") is empty', seed_file)
 
     def random_data(self, n: int):
         # n: Number of bytes of random data to generate
