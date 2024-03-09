@@ -113,6 +113,6 @@ if __name__ == "__main__":
     # fortuna.update_seed_file()
     Cmd().cmdloop()
     try:
-        fortuna.write_seed_file()  # TODO: handle NotSeeded
+        fortuna.write_seed_file()
     except FortunaNotSeeded:
         print("not writing seed file")

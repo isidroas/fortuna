@@ -22,7 +22,6 @@ class Generator(object):
     def __init__(self):
         self.key = b"\x00" * 32
         self.counter = 0
-        # TODO: rename K->key, C->counter like pycrypto
 
     def reseed(self, seed: bytes):
         self.key = sha_double_256(self.key + seed)
