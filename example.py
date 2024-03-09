@@ -102,6 +102,10 @@ class Cmd(cmd.Cmd):
         for line in textwrap.wrap(file.read().hex(' ', 2).upper(), width=40):
             print(line)
 
+    def do_print_pools(self, arg):
+        from test_format import format_pools
+        print(format_pools(fortuna.pools))
+
     def complete_add_entropy(self, text, line, begidx, endidx):
         if not text:
             return ["key_value", "timestamp"]
