@@ -7,11 +7,11 @@ from cryptography.hazmat.primitives import ciphers
 class FortunaNotSeeded(Exception): ...
 
 
-def encrypt(key: bytes, c: int):
+def encrypt(key: bytes, counter: int):
     # TODO: separate construction and encryption to save time in key scheduling?
     cipher = ciphers.Cipher(ciphers.algorithms.AES(key), mode=ciphers.modes.ECB())
     encryptor = cipher.encryptor()
-    return encryptor.update(c.to_bytes(16, "little"))
+    return encryptor.update(counter.to_bytes(16, "little"))
 
 
 def sha_double_256(data):
@@ -24,12 +24,8 @@ class Generator(object):
         self.counter = 0
         # TODO: rename K->key, C->counter like pycrypto
 
-    def reseed(self, s: bytes):
-        """
-        G: Generator state, G = (K, C)
-        s: New or additional seed
-        """
-        self.key = sha_double_256(self.key + s)
+    def reseed(self, seed: bytes):
+        self.key = sha_double_256(self.key + seed)
         self.counter += 1
 
     def generate_blocks(self, k: int):
