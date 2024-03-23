@@ -1,3 +1,4 @@
+import os
 import contextlib
 import enum
 import sys
@@ -24,6 +25,13 @@ pool_counter = {
     Source.KEY_VALUE: 0,
 }
 
+import subprocess
+def get_columns():
+    """
+    variable $COLUMNS is not in the environment. It is a shell varible (see man bash)
+    """
+    return int(subprocess.run(['tput','cols'], capture_output=True).stdout)
+    
 
 @contextlib.contextmanager
 def cbreak_mode():
@@ -104,7 +112,7 @@ class Cmd(cmd.Cmd):
 
     def do_print_pools(self, arg):
         from test_format import format_pools
-        print(format_pools(fortuna.pools))
+        print(format_pools(fortuna.pools,width = get_columns() ))
 
     def complete_add_entropy(self, text, line, begidx, endidx):
         if not text:
