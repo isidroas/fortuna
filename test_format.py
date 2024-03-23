@@ -23,7 +23,7 @@ def _get_sources(pool_index, sources):
 
 def _get_templates(n_pools, n_sources, width):
     """
-    >>> template, pointer_template= _get_templates(5, 3, width=20)
+    >>> template, pointer_template, _= _get_templates(5, 3, width=20)
     >>> pointer_template
     ' <- {: <5}'
     >>> template
@@ -88,8 +88,8 @@ def test_pools():
 
     res = format_pools(pools, width=17)
     assert res == """\
-0: 0x00        
-1: 0x0102      
+0: 0x00          
+1: 0x0102        
 """
 
 def test_source_pointer():
@@ -118,4 +118,10 @@ def test_overflow():
 1: 0x(+4)..05 <- 0  
 """
 
-# TODO: test empty
+def test_pools_empty():
+
+    res = format_pools([b'', b''], width=17)
+    assert res == """\
+0: 0x            
+1: 0x            
+"""
