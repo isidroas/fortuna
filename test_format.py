@@ -73,10 +73,11 @@ def format_pools(pools, sources=(), width = 27):
 
         number_of_pool: 0xCAFEE     <- source1, source2
     """
-    template, pointer_template= _get_templates(len(pools), len(sources), width)
+    template, pointer_template, hex_width = _get_templates(len(pools), len(sources), width)
     res =''
     for index, pool in enumerate(pools):
-        res+=template.format(index, pool.hex().upper())
+        data = pool.hex().upper()
+        res+=template.format(index, format_overflow(data, hex_width))
         sources_pointing = list(_get_sources(index, sources))
         if sources_pointing:
             res += pointer_template.format(','.join(str(i) for i in sources_pointing))
@@ -114,7 +115,7 @@ def test_overflow():
     res = format_pools(pools2, [1, 0], width=20)
     assert res == """\
 0: 0x00       <- 1  
-1: ( +3 )..05 <- 0  
+1: 0x(+4)..05 <- 0  
 """
 
 # TODO: test empty
