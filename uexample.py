@@ -14,54 +14,67 @@ palette = [
     ("buttnf", "white", "dark blue", "bold"),
 ]
 
-colors_256 ={
-    'black':'h0',
-    'red':'h1',
-    'green':'h2',
-    'brown':'h3',
-    'blue':'h4',
-    'magenta':'h5',
-    'cyan':'h6',
-    'light gray':'h7',
-    'dark gray':'h8',
-    'bright red':'h9',
-    'bright green':'h10',
-    'bright brown':'h11',
-    'bright blue':'h12',
-    'bright magenta':'h13',
-    'bright cyan':'h14',
-    'white':'h15',
+colors_256 = {
+    "black": "h0",
+    "red": "h1",
+    "green": "h2",
+    "brown": "h3",
+    "blue": "h4",
+    "magenta": "h5",
+    "cyan": "h6",
+    "light gray": "h7",
+    "dark gray": "h8",
+    "bright red": "h9",
+    "bright green": "h10",
+    "bright brown": "h11",
+    "bright blue": "h12",
+    "bright magenta": "h13",
+    "bright cyan": "h14",
+    "white": "h15",
 }
+
 
 def main():
 
     # TODO: put titles
-    pools = u.Text([(u.AttrSpec(colors_256['white'], colors_256['green'], 256),"pools"), ('normal',"no\n pool")])
-    seed_file = u.Text('0x' + "DEADCODE" * 16)
+    pools = u.Text(
+        [
+            (u.AttrSpec(colors_256["white"], colors_256["green"], 256), "pools"),
+            ("normal", "no\n pool"),
+        ]
+    )
+    seed_file = u.Text("0x" + "DEADCODE" * 16)
     output_history = u.Text("random output")
     events = u.Text("Events")
 
+    columns = u.Columns(
+        u.LineBox(w, title=t)
+        for w, t in [
+            (pools, "pools"),
+            (seed_file, "seed file"),
+            (output_history, "output history"),
+            (events, "events"),
+        ]
+    )
 
-    columns = u.Columns( u.LineBox(w, title=t) for w,t in [(pools, 'pools'), (seed_file, 'seed file'), (output_history, 'output history'), (events, 'events')])
+    filler = u.Filler(columns, "top")
 
-    filler = u.Filler(columns, 'top')
-
-    PALETTE = [("normal", "black", "white"),
-                ("selected", "black", "light cyan")]
+    PALETTE = [("normal", "black", "white"), ("selected", "black", "light cyan")]
 
     def unhandled_input(data: str | tuple[str, int, int, int]) -> bool | None:
         # print(data)
-        if data == 'q':
+        if data == "q":
             raise u.ExitMainLoop()
-        elif data == 't':
-            seed_file.set_text('updated text')
+        elif data == "t":
+            seed_file.set_text("updated text")
             return True
         return False
 
-    loop = u.MainLoop(filler, unhandled_input= unhandled_input)
+    loop = u.MainLoop(filler, unhandled_input=unhandled_input)
 
     loop.run()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
 
     main()
