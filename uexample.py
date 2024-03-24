@@ -34,31 +34,38 @@ colors_256 = {
 }
 
 # green = u.AttrSpec(colors_256["white"], colors_256["green"], 256)
-green = u.AttrSpec(colors_256["green"], 'default', 256)
+pool_index = u.AttrSpec(colors_256["green"], 'default', 256)
+new_random =u.AttrSpec('bold', 'default', 256)
 
 def main():
 
-    # TODO: put titles
     pools = u.Text(
         [
-            (green, "0: "),
+            (pool_index, "0: "),
             ("normal", "0x00   \n"),
-            (green, "1: "),
+            (pool_index, "1: "),
             ("normal", "0x0102  <- 0,1\n"),
-        ]
+        ] * 16
     )
     seed_file = u.Text("0x" + "DEADCODE" * 16)
-    output_history = u.Text("random output")
-    events = u.Text("Events")
+    output_history = u.Text(["FOCACCIA"*4, (new_random, "FEE1DEAD"*4 )])
+    events = u.Text("Events") # list
 
-    columns = u.Columns(
+    pile = u.Pile(
         u.LineBox(w, title=t)
         for w, t in [
-            (pools, "pools"),
             (seed_file, "seed file"),
             (output_history, "output history"),
             (events, "events"),
         ]
+    )
+    pile = u.Filler(pile, height=('relative', 100))
+
+    columns = u.Columns(
+           [
+           u.LineBox(pools, title="pools"),
+           pile
+            ]
     )
 
     filler = u.Filler(columns, "top")
@@ -72,9 +79,16 @@ def main():
         elif data == "t":
             seed_file.set_text("updated text")
             return True
+        elif data =='p':
+            from time import sleep
+            with StoppedScreen(loop.screen):
+                print('hello friend')
+                sleep(0.5)
+                print('bye friend')
+                sleep(0.5)
         return False
 
-    loop = u.MainLoop(filler, unhandled_input=unhandled_input)
+    loop = u.MainLoop(filler, unhandled_input = unhandled_input)
 
     loop.run()
 
@@ -82,3 +96,4 @@ def main():
 if __name__ == "__main__":
 
     main()
+
