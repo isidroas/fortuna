@@ -35,13 +35,14 @@ colors_256 ={
 
 def main():
 
+    # TODO: put titles
     pools = u.Text([(u.AttrSpec(colors_256['white'], colors_256['green'], 256),"pools"), ('normal',"no\n pool")])
-    seed_file = u.Text("seed_file")
+    seed_file = u.Text('0x' + "DEADCODE" * 16)
     output_history = u.Text("random output")
     events = u.Text("Events")
 
 
-    columns = u.Columns( u.LineBox(w) for w in [pools, seed_file, output_history, events])
+    columns = u.Columns( u.LineBox(w, title=t) for w,t in [(pools, 'pools'), (seed_file, 'seed file'), (output_history, 'output history'), (events, 'events')])
 
     filler = u.Filler(columns, 'top')
 
