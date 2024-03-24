@@ -33,14 +33,18 @@ colors_256 = {
     "white": "h15",
 }
 
+# green = u.AttrSpec(colors_256["white"], colors_256["green"], 256)
+green = u.AttrSpec(colors_256["green"], 'default', 256)
 
 def main():
 
     # TODO: put titles
     pools = u.Text(
         [
-            (u.AttrSpec(colors_256["white"], colors_256["green"], 256), "pools"),
-            ("normal", "no\n pool"),
+            (green, "0: "),
+            ("normal", "0x00   \n"),
+            (green, "1: "),
+            ("normal", "0x0102  <- 0,1\n"),
         ]
     )
     seed_file = u.Text("0x" + "DEADCODE" * 16)
