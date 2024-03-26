@@ -51,7 +51,14 @@ def main():
     )
     seed_file = u.Text("0x" + "DEADCODE" * 16)
     output_history = u.Text(["FOCACCIA" * 4, (new_random, "FEE1DEAD" * 4)])
-    events = u.Text("Events")  # list
+    events = u.Text([
+        "Pressed 'k'\n",
+        "Pressed 'j'\n",
+        "timestamp: 16:59:30.671210\n",
+        "timestamp: 16:59:30.952142\n",
+        "not writing seed file\n",
+        "found empty tmp/seed_file file",
+    ])  # list
     help = u.Text(
         [
             "c: Add entropy from keystrokes char\n",
@@ -64,17 +71,22 @@ def main():
 
     pile = u.Pile(
         [
-            u.LineBox(w, title=t)
-            for w, t in (
-                (seed_file, "seed file"),
-                (output_history, "output history"),
-                (events, "events"),
-                (help, "help"),
-            )
+            u.Columns(
+                [
+                    u.LineBox(seed_file, title="seed file"),
+                    u.LineBox(output_history, title="output history"),
+                ]
+            ),
+            u.Columns(
+                [
+                    u.LineBox(events, title="events"),
+                    u.LineBox(help, title="help"),
+                ]
+            ),
         ]
     )
     print(pile)
-    pile = u.Filler(pile, height=("relative", 100))
+    # pile = u.Filler(pile, height=("relative", 100))
 
     columns = u.Columns([u.LineBox(pools, title="pools"), pile])
 
