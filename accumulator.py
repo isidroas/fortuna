@@ -8,7 +8,8 @@ from generator import Generator, sha_double_256
 
 MINPOOLSIZE = 64
 
-LOG= logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
+
 
 class FortunaSeedFileError(Exception): ...
 
@@ -43,8 +44,7 @@ class Fortuna(object):
             except FortunaSeedFileEmpty:
                 LOG.info('seed file ("%s") is empty', seed_file)
 
-    def random_data(self, n: int):
-        # n: Number of bytes of random data to generate
+    def random_data(self, nbytes: int):
         if len(self.pools[0]) >= MINPOOLSIZE and (time() - self.last_seed) > 0.1:
             self.reseed_cnt += 1
             s = bytearray()
@@ -61,18 +61,13 @@ class Fortuna(object):
         # if self.reseed_cnt == 0:
         #     raise FortunaNotSeeded("Generate error, PRNG not seeded yet")
 
-        return self.generator.pseudo_randomdata(n)
+        return self.generator.pseudo_randomdata(nbytes)
 
-    def add_random_event(self, s: int, i: int, e: bytes):
-        """
-        s: Source number in range(256)
-        i: Pool number in range(32)
-        e: Event data
-        """
-        assert 1 <= len(e) <= 32
-        assert 0 <= s <= 255
-        assert 0 <= i <= 31
-        self.pools[i] += bytes([s, len(e)]) + e
+    def add_random_event(self, source: int, pool: int, data: bytes):
+        assert 1 <= len(data) <= 32
+        assert 0 <= source <= 255
+        assert 0 <= pool <= 31
+        self.pools[pool] += bytes([source, len(data)]) + data
         # not doing the hash here:
         #  x it is a waste of memory
         #  ✓ save time to entropy sources, which are typically real-time drivers
