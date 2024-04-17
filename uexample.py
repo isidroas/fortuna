@@ -66,25 +66,22 @@ def main():
         [
             u.Columns(
                 [
-                    u.LineBox(seed_file, title="seed file"),
-                    u.LineBox(output_history, title="output history"),
+                    u.LineBox(u.Filler(seed_file, 'top'), title="seed file"),
+                    u.LineBox(u.Filler(output_history, 'bottom'), title="output history"),
                 ]
             ),
             u.Columns(
                 [
-                    u.LineBox(events_list, title="events"),
-                    u.LineBox(help, title="help"),
+                    # u.LineBox(events_list, title="events"),
+                    u.LineBox(u.Filler(help, 'bottom'), title="help"),
 
                 ]
             ),
         ]
     )
-    print(pile)
-    # pile = u.Filler(pile, height=("relative", 100))
 
-    columns = u.Columns([u.LineBox(pools, title="pools"), pile])
+    top = u.Columns([u.LineBox(u.Filler(pools), title="pools"), pile])
 
-    filler = u.Filler(columns, "top")
 
     PALETTE = [("normal", "black", "white"), ("selected", "black", "light cyan")]
 
@@ -103,7 +100,7 @@ def main():
 
         return False
 
-    loop = u.MainLoop(filler, unhandled_input=unhandled_input)
+    loop = u.MainLoop(top, unhandled_input=unhandled_input)
 
     loop.run()
 
