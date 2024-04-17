@@ -1,19 +1,7 @@
 import urwid as u
 
 
-palette = [
-    ("body", "black", "light gray", "standout"),
-    ("reverse", "light gray", "black"),
-    ("header", "white", "dark red", "bold"),
-    ("important", "dark blue", "light gray", ("standout", "underline")),
-    ("editfc", "white", "dark blue", "bold"),
-    ("editbx", "light gray", "dark blue"),
-    ("editcp", "black", "light gray", "standout"),
-    ("bright", "dark gray", "light gray", ("bold", "standout")),
-    ("buttn", "black", "dark cyan"),
-    ("buttnf", "white", "dark blue", "bold"),
-]
-
+# using high colors file:///home/isidro/op/urwid/build/documentation/manual/displayattributes.html#bright-background-colors instead of bright I don't remember why
 colors_256 = {
     "black": "h0",
     "red": "h1",
@@ -51,14 +39,19 @@ def main():
     )
     seed_file = u.Text("0x" + "DEADCODE" * 16)
     output_history = u.Text(["FOCACCIA" * 4, (new_random, "FEE1DEAD" * 4)])
-    events = u.Text([
-        "Pressed 'k'\n",
-        "Pressed 'j'\n",
-        "timestamp: 16:59:30.671210\n",
-        "timestamp: 16:59:30.952142\n",
-        "not writing seed file\n",
+
+    # # events = u.Text([
+    # events = u.SimpleListWalker([])
+    events = u.SimpleListWalker(u.Text(t) for t in [
+        "Pressed 'k'",
+        "Pressed 'j'",
+        "timestamp: 16:59:30.671210",
+        "timestamp: 16:59:30.952142",
+        "not writing seed file",
         "found empty tmp/seed_file file",
     ])  # list
+    events_list =u.ListBox(events)
+
     help = u.Text(
         [
             "c: Add entropy from keystrokes char\n",
@@ -101,14 +94,12 @@ def main():
         elif data == "t":
             seed_file.set_text("updated text")
             return True
-        elif data == "p":
-            from time import sleep
+        elif data == "e":
+            # source: pudb.debugger.add_cmdline_content
+            events.append(u.Text('alarmmm!'))
+            events_list.set_focus_valign("bottom")
+            events_list.set_focus(len(events) - 1, coming_from="above")
 
-            with StoppedScreen(loop.screen):
-                print("hello friend")
-                sleep(0.5)
-                print("bye friend")
-                sleep(0.5)
         return False
 
     loop = u.MainLoop(filler, unhandled_input=unhandled_input)
