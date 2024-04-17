@@ -72,8 +72,9 @@ def main():
             ),
             u.Columns(
                 [
-                    u.LineBox(events, title="events"),
+                    u.LineBox(events_list, title="events"),
                     u.LineBox(help, title="help"),
+
                 ]
             ),
         ]
