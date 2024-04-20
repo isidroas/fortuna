@@ -25,43 +25,8 @@ colors_256 = {
 pool_index = u.AttrSpec(colors_256["green"], "default", 256)
 new_random = u.AttrSpec("bold", "default", 256)
 
-
-def main():
-
-    pools = u.Text(
-        [
-            (pool_index, "0: "),
-            ("normal", "0x00   \n"),
-            (pool_index, "1: "),
-            ("normal", "0x0102  <- 0,1\n"),
-        ]
-        * 16
-    )
-    seed_file = u.Text("0x" + "DEADCODE" * 16)
-    output_history = u.Text(["FOCACCIA" * 4, (new_random, "FEE1DEAD" * 4)])
-
-    # # events = u.Text([
-    # events = u.SimpleListWalker([])
-    events = u.SimpleListWalker(u.Text(t) for t in [
-        "Pressed 'k'",
-        "Pressed 'j'",
-        "timestamp: 16:59:30.671210",
-        "timestamp: 16:59:30.952142",
-        "not writing seed file",
-        "found empty tmp/seed_file file",
-    ])  # list
-    events_list =u.ListBox(events)
-
-    help = u.Text(
-        [
-            "c: Add entropy from keystrokes char\n",
-            "t: Add entropy from keystrokes timestamp\n",
-            "f: Update seed file\n",
-            "r: generate random\n",
-            "b: edit number of blocks\n",
-        ]
-    )
-
+def create_top(pools: u.Text, seed_file: u.Text, output_history: u.Text, events: u.SimpleListWalker, help: u.Text):
+    events_list =u.ListBox(events) # only used once?
     pile = u.Pile(
         [
             u.Columns(
@@ -81,9 +46,42 @@ def main():
     )
 
     top = u.Columns([u.LineBox(u.Filler(pools), title="pools"), pile])
+    return top
 
+def main():
 
-    PALETTE = [("normal", "black", "white"), ("selected", "black", "light cyan")]
+    pools = u.Text(
+        [
+            (pool_index, "0: "),
+            ("normal", "0x00   \n"),
+            (pool_index, "1: "),
+            ("normal", "0x0102  <- 0,1\n"),
+        ]
+        * 16
+    )
+    seed_file = u.Text("0x" + "DEADCODE" * 16)
+    output_history = u.Text(["FOCACCIA" * 4, (new_random, "FEE1DEAD" * 4)])
+
+    # events = u.SimpleListWalker([])
+    events = u.SimpleListWalker(u.Text(t) for t in [
+        "Pressed 'k'",
+        "Pressed 'j'",
+        "timestamp: 16:59:30.671210",
+        "timestamp: 16:59:30.952142",
+        "not writing seed file",
+        "found empty tmp/seed_file file",
+    ])  # list
+
+    help = u.Text(
+        [
+            "c: Add entropy from keystrokes char\n",
+            "t: Add entropy from keystrokes timestamp\n",
+            "f: Update seed file\n",
+            "r: generate random\n",
+            "b: edit number of blocks\n",
+        ]
+    )
+
 
     def unhandled_input(data: str | tuple[str, int, int, int]) -> bool | None:
         # print(data)
@@ -100,8 +98,7 @@ def main():
 
         return False
 
-    loop = u.MainLoop(top, unhandled_input=unhandled_input)
-
+    loop = u.MainLoop(create_top(pools, seed_file, output_history, events, help) , unhandled_input=unhandled_input)
     loop.run()
 
 
