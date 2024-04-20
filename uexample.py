@@ -5,6 +5,11 @@ import logging
 LOG = logging.getLogger(__name__)
 
 
+def configure_logging(events: u.ListBox):
+    # logging.root.addHandler()
+    handler = UrwidHandler(events)
+    logging.basicConfig(level=logging.DEBUG, handlers=[handler])
+
 class UrwidHandler(logging.Handler):
     def __init__(self, events: u.ListBox):
         self.events = events
@@ -14,10 +19,7 @@ class UrwidHandler(logging.Handler):
         add_event(self.events, self.format(record))
 
     def format(self, record) -> u.Text:
-        if record.levelno is logging.WARNING:
-            color = "yellow"
-        else:
-            color = "green"
+        color = {logging.WARNING: warning, logging.ERROR: error}.get(record.levelno, debug)
         text = "[%s] %s" % (record.levelname, record.msg)
         return u.Text((color, text))
 
@@ -50,10 +52,14 @@ colors_256 = {
     "white": "h15",
 }
 
+# TODO: create class Theme?
 # green = u.AttrSpec(colors_256["white"], colors_256["green"], 256)
 pool_index = u.AttrSpec(colors_256["green"], "default", 256)
 new_random = u.AttrSpec("bold", "default", 256)
 old_random = u.AttrSpec(colors_256["light gray"], "default", 256)
+error = u.AttrSpec(colors_256["red"], "default", 256)
+warning = u.AttrSpec(colors_256["brown"], "default", 256)
+debug = old_random
 
 
 def create_top(
@@ -122,7 +128,8 @@ def main():
         )
     )
 
-    LOG.addHandler(UrwidHandler(events))
+
+    configure_logging(events)
 
     help = u.Text(
         [
@@ -147,6 +154,8 @@ def main():
             LOG.warning("esto petardea :)")
         elif data == "e":
             LOG.error("esto petardea :)")
+        elif data == "d":
+            LOG.debug("esto petardea :)")
         elif data == "r":
             add_output_history(output_history, b"\xde\xca\xfb\xad")
 
@@ -157,6 +166,8 @@ def main():
         unhandled_input=unhandled_input,
     )
     loop.run()
+    from logging_tree import printout
+    printout()
 
 
 if __name__ == "__main__":
