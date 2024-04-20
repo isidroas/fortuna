@@ -9,6 +9,7 @@ def configure_logging(events: u.ListBox):
     # logging.root.addHandler()
     handler = UrwidHandler(events)
     logging.basicConfig(level=logging.DEBUG, handlers=[handler])
+    # TODO: exclude urwid debug or include fortuna debug
 
 class UrwidHandler(logging.Handler):
     def __init__(self, events: u.ListBox):
@@ -19,7 +20,7 @@ class UrwidHandler(logging.Handler):
         add_event(self.events, self.format(record))
 
     def format(self, record) -> u.Text:
-        color = {logging.WARNING: warning, logging.ERROR: error}.get(record.levelno, debug)
+        color = {logging.WARNING: warning, logging.ERROR: error, logging.DEBUG: debug}.get(record.levelno, default)
         text = "[%s] %s" % (record.levelname, record.msg)
         return u.Text((color, text))
 
@@ -60,6 +61,7 @@ old_random = u.AttrSpec(colors_256["light gray"], "default", 256)
 error = u.AttrSpec(colors_256["red"], "default", 256)
 warning = u.AttrSpec(colors_256["brown"], "default", 256)
 debug = old_random
+default = u.AttrSpec('default', "default", 256)
 
 
 def create_top(
@@ -103,9 +105,9 @@ def main():
     pools = u.Text(
         [
             (pool_index, "0: "),
-            ("normal", "0x00   \n"),
+            (default, "0x00   \n"),
             (pool_index, "1: "),
-            ("normal", "0x0102  <- 0,1\n"),
+            (default, "0x0102  <- 0,1\n"),
         ]
         * 16
     )
@@ -148,14 +150,14 @@ def main():
         elif data == "t":
             seed_file.set_text("updated text")
             return True
-        # elif data == "e":
-        #     add_event(events, u.Text('alarmmm!'))
         elif data == "w":
             LOG.warning("esto petardea :)")
         elif data == "e":
             LOG.error("esto petardea :)")
         elif data == "d":
             LOG.debug("esto petardea :)")
+        elif data == "i":
+            LOG.info("esto petardea :)")
         elif data == "r":
             add_output_history(output_history, b"\xde\xca\xfb\xad")
 
