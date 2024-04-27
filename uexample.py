@@ -9,6 +9,7 @@ def configure_logging(events: u.ListBox):
     # logging.root.addHandler()
     handler = UrwidHandler(events)
     logging.basicConfig(level=logging.DEBUG, handlers=[handler])
+    logging.getLogger('urwid').setLevel(logging.INFO)
     # TODO: exclude urwid debug or include fortuna debug. Aunque a veces es util tenerlo activado porque veo los keypresses y sus símbolos correspondientes.
 
 class UrwidHandler(logging.Handler):
