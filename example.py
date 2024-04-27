@@ -141,5 +141,5 @@ if __name__ == "__main__":
     try:
         fortuna.write_seed_file()
     except FortunaNotSeeded:
-        print("not writing seed file")
+        LOG.info("not writing seed file since not seeded")
     

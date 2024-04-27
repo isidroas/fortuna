@@ -46,3 +46,10 @@ def test_pools_empty():
 0: 0x            
 1: 0x            
 """
+
+def test_bytes_template():
+    template = Template('0x{:X}')
+    assert '0x12AB' == template.format(b'\x12\xab')
+
+    template = Template('0x{:8X}')
+    assert '0x(+4)..35' == template.format(b'12345')

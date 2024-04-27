@@ -79,10 +79,21 @@ class Fortuna(object):
         #  ✓ simpler because you don't have to maintain a counter, just do `len(pool)`
 
     def write_seed_file(self):
-        self.seed_file.seek(0)
-        self.seed_file.write(self.random_data(64))
+        """
+        IMO this should only called by APP when seed file is empty, the first time that is seeded at least at the end
+        """
+        self._overwrite_seed_file(self.random_data(64))
 
     def update_seed_file(self):
+        """
+        IMO this should be called periodically or at the end
+        """
+        s = self._read_seed_file()
+        self.generator.reseed(s)
+        self._overwrite_seed_file(self.random_data(64))
+
+    @log_on_end(logging.DEBUG,Template('read seed file 0x{result:50X}'))
+    def _read_seed_file(self):
         self.seed_file.seek(0)
         s = self.seed_file.read()
         if len(s) == 0:
@@ -90,6 +101,9 @@ class Fortuna(object):
         elif len(s) != 64:
             msg = "file size is %d instead of 64" % len(s)
             raise FortunaSeedFileError(msg)
-        self.generator.reseed(s)
+        return s
+        
+    @log_on_end(logging.DEBUG,Template('write seed file 0x{data:50X}'))
+    def _overwrite_seed_file(self, data):
         self.seed_file.seek(0)
-        self.seed_file.write(self.random_data(64))
+        self.seed_file.write(data)

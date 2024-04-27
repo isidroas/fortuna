@@ -86,8 +86,11 @@ class Formatter(string.Formatter):
     def format_field(self, value, format_spec):
         if isinstance(value, (bytes, bytearray)):
             if format_spec.endswith('X'):
-                value = value.hex().upper()
                 format_spec = format_spec[:-1]
+                value = value.hex().upper()
+            if format_spec.isdigit():
+                value = format_overflow(value, int(format_spec))
+                format_spec = ''
         return super().format_field(value, format_spec)
 
 from collections import UserString
