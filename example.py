@@ -11,10 +11,15 @@ from datetime import datetime
 import readline
 
 
+LOG = logging.getLogger(__name__)
 
 def configure_logging():
     logging.basicConfig(level=logging.DEBUG)
     logging.getLogger('urwid').setLevel(logging.INFO)
+    import coloredlogs
+    # coloredlogs.DEFAULT_LEVEL_STYLES = {'critical': {'bold': True, 'color': 'red'}, 'debug': {'color': 7}, 'error': {'color': 'red'}, 'info': {}, 'notice': {'color': 'magenta'}, 'spam': {'color': 'green', 'faint': True}, 'success': {'bold': True, 'color': 'green'}, 'verbose': {'color': 'blue'}, 'warning': {'color': 'yellow'}}
+    coloredlogs.DEFAULT_LEVEL_STYLES['debug']= {'color': 7}
+    coloredlogs.install(level='DEBUG', fmt ='%(name)10s.%(funcName)10s:%(lineno)3d %(levelname)s %(message)s')
 
 class Source(enum.IntEnum):
     TIMESTAMP = 0
@@ -93,9 +98,10 @@ class Cmd(cmd.Cmd):
         try:
             data = fortuna.random_data(nbytes)
         except FortunaNotSeeded:
-            print("Can not generate random data. Add entropy first")
+            LOG.error("Can not generate random data. Add entropy first")
         else:
-            print("0x%s" % data.hex().upper())
+            # print("0x%s" % data.hex().upper())
+            pass # logging already handles
 
     def do_add_entropy(self, arg):
         """

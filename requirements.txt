@@ -1,3 +1,5 @@
 cryptography
 pytest
 urwid
+coloredlogs
+logdecorator

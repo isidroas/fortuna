@@ -2,7 +2,22 @@ import logging
 import math
 from hashlib import sha256
 
+from logdecorator import log_on_start, log_on_end
 LOG = logging.getLogger(__name__)
+import string
+from functools import partial
+class Formatter(string.Formatter):
+    def format_field(self, value, format_spec):
+        if isinstance(value, (bytes, bytearray)):
+            if format_spec.endswith('X'):
+                value = value.hex().upper()
+                format_spec = format_spec[:-1]
+        return super().format_field(value, format_spec)
+
+class Template(str):
+    def format(self_, *args, **kwargs):
+        fmt = Formatter()
+        return fmt.format(self_, *args, **kwargs)
 
 from cryptography.hazmat.primitives import ciphers
 
@@ -31,6 +46,8 @@ class Generator(object):
         self.key = sha_double_256(self.key + seed)
         self.counter += 1
 
+    @log_on_start(logging.DEBUG, 'requested {blocks} block(s)')
+    @log_on_end(logging.DEBUG, Template('generated blocks 0x{result:X}')) # propose to lib  {funcName} or %(funcName) ? bug to lib %(funcName) is 'log'
     def generate_blocks(self, blocks: int) -> bytes:
         if self.counter == 0:
             raise FortunaNotSeeded("Generate error, PRNG not seeded yet")
@@ -40,6 +57,8 @@ class Generator(object):
             self.counter += 1
         return r
 
+    @log_on_start(logging.INFO, 'requested {nbytes} byte(s)')
+    @log_on_end(logging.INFO, Template('generated random 0x{result:X}'))
     def pseudo_randomdata(self, nbytes: int) -> bytes:
         assert 0 <= nbytes <= 2**20
         r = self.generate_blocks(math.ceil(nbytes / 16))[:nbytes]
