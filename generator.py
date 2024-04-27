@@ -1,5 +1,8 @@
+import logging
 import math
 from hashlib import sha256
+
+LOG = logging.getLogger(__name__)
 
 from cryptography.hazmat.primitives import ciphers
 
@@ -42,3 +45,12 @@ class Generator(object):
         r = self.generate_blocks(math.ceil(nbytes / 16))[:nbytes]
         self.key = self.generate_blocks(2)
         return r
+
+    @property
+    def key(self):
+        return self._key
+
+    @key.setter
+    def key(self, value: bytes):
+        LOG.info('key set to 0x%s'% value.hex().upper())
+        self._key = value

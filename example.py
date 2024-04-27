@@ -6,9 +6,15 @@ import termios
 import tty
 import cmd
 import textwrap
+import logging
 from datetime import datetime
 import readline
 
+
+
+def configure_logging():
+    logging.basicConfig(level=logging.DEBUG)
+    logging.getLogger('urwid').setLevel(logging.INFO)
 
 class Source(enum.IntEnum):
     TIMESTAMP = 0
@@ -126,6 +132,7 @@ class Cmd(cmd.Cmd):
 
 if __name__ == "__main__":
     # fortuna.update_seed_file()
+    configure_logging()
     Cmd().cmdloop()
     try:
         fortuna.write_seed_file()
