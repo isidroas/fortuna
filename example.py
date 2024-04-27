@@ -29,7 +29,6 @@ class Source(enum.IntEnum):
 from accumulator import Fortuna
 from generator import FortunaNotSeeded
 
-fortuna = Fortuna(seed_file="./seed_file")
 
 pool_counter = {
     Source.TIMESTAMP: 0,
@@ -67,7 +66,6 @@ def add_entropy(source=Source.KEY_VALUE):
             except KeyboardInterrupt:
                 break
             if source is Source.KEY_VALUE:
-                print("key: {!r}".format(char))
                 fortuna.add_random_event(
                     Source.KEY_VALUE, pool_counter[Source.KEY_VALUE], char.encode()
                 )
@@ -75,7 +73,6 @@ def add_entropy(source=Source.KEY_VALUE):
                 pool_counter[Source.KEY_VALUE] %= 32
             elif source is Source.TIMESTAMP:
                 now = datetime.now()
-                print("timestamp: {:%H:%M:%S.%f}".format(now))
                 fortuna.add_random_event(
                     Source.TIMESTAMP,
                     pool_counter[Source.TIMESTAMP],
@@ -139,8 +136,10 @@ class Cmd(cmd.Cmd):
 if __name__ == "__main__":
     # fortuna.update_seed_file()
     configure_logging()
+    fortuna = Fortuna(seed_file="./seed_file")
     Cmd().cmdloop()
     try:
         fortuna.write_seed_file()
     except FortunaNotSeeded:
         print("not writing seed file")
+    

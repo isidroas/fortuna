@@ -5,6 +5,8 @@ from pathlib import Path
 from time import time
 
 from generator import Generator, sha_double_256
+from logdecorator import log_on_start, log_on_end
+from formatter import Template
 
 MINPOOLSIZE = 64
 
@@ -34,6 +36,8 @@ class Fortuna(object):
             if not seed_file.exists():
                 seed_file.touch()
                 LOG.info('Created seed file "%s"', seed_file)
+            else:
+                LOG.info('Loading existing seed file "%s"', seed_file)
             self.seed_file = open(
                 seed_file, "r+b"
             )  # if using r+, the stream is positioned at the end (depends on platforms), but the file is not created if it does't exist. I would need `flags = O_RDWR | O_CREAT`
@@ -63,6 +67,7 @@ class Fortuna(object):
 
         return self.generator.pseudo_randomdata(nbytes)
 
+    @log_on_end(logging.INFO, Template('added {source!r} to pool {pool}: 0x{data:X}'))
     def add_random_event(self, source: int, pool: int, data: bytes):
         assert 1 <= len(data) <= 32
         assert 0 <= source <= 255
