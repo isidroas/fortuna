@@ -9,7 +9,7 @@ def configure_logging(events: u.ListBox):
     # logging.root.addHandler()
     handler = UrwidHandler(events)
     logging.basicConfig(level=logging.DEBUG, handlers=[handler])
-    # TODO: exclude urwid debug or include fortuna debug
+    # TODO: exclude urwid debug or include fortuna debug. Aunque a veces es util tenerlo activado porque veo los keypresses y sus símbolos correspondientes.
 
 class UrwidHandler(logging.Handler):
     def __init__(self, events: u.ListBox):
@@ -144,7 +144,6 @@ def main():
     )
 
     def unhandled_input(data: str | tuple[str, int, int, int]) -> bool | None:
-        # print(data)
         if data == "q":
             raise u.ExitMainLoop()
         elif data == "t":
