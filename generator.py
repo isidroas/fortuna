@@ -54,3 +54,12 @@ class Generator(object):
     def key(self, value: bytes):
         LOG.info('key set to 0x%s'% value.hex().upper())
         self._key = value
+
+    @property
+    def counter(self):
+        return self._counter
+
+    @counter.setter
+    def counter(self, value: int):
+        LOG.info('counter set to %d'% value)
+        self._counter = value
