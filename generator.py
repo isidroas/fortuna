@@ -4,20 +4,7 @@ from hashlib import sha256
 
 from logdecorator import log_on_start, log_on_end
 LOG = logging.getLogger(__name__)
-import string
-from functools import partial
-class Formatter(string.Formatter):
-    def format_field(self, value, format_spec):
-        if isinstance(value, (bytes, bytearray)):
-            if format_spec.endswith('X'):
-                value = value.hex().upper()
-                format_spec = format_spec[:-1]
-        return super().format_field(value, format_spec)
-
-class Template(str):
-    def format(self_, *args, **kwargs):
-        fmt = Formatter()
-        return fmt.format(self_, *args, **kwargs)
+from formatter import Template
 
 from cryptography.hazmat.primitives import ciphers
 
