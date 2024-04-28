@@ -1,5 +1,6 @@
 A didactic implementation of the Fortuna cryptographically secure pseudorandom number generator.
 
+Examples only tested in Linux, but they should work also in macOS.
 
 # Learn specification
 

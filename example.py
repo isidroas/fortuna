@@ -1,4 +1,5 @@
 import os
+import math
 import contextlib
 import enum
 import sys
@@ -7,7 +8,7 @@ import tty
 import cmd
 import textwrap
 import logging
-from datetime import datetime
+import time
 import readline
 
 
@@ -98,11 +99,15 @@ def add_entropy(source=Source.KEY_VALUE):
                 pool_counter[Source.KEY_VALUE] += 1
                 pool_counter[Source.KEY_VALUE] %= 32
             elif source is Source.TIMESTAMP:
-                now = datetime.now()
+                nanoseconds = time.clock_gettime_ns(time.CLOCK_MONOTONIC_RAW)
+                seconds = int(nanoseconds/1e9)
+
+                nbytes = math.ceil(int(1e9).bit_length() / 8)
+                from datetime import datetime
                 fortuna.add_random_event(
                     Source.TIMESTAMP,
                     pool_counter[Source.TIMESTAMP],
-                    now.microsecond.to_bytes(20, "little"),  # log2(1e6) ≅ 20
+                    int(nanoseconds - seconds * 1e9).to_bytes(nbytes, "little")
                 )
                 pool_counter[Source.TIMESTAMP] += 1
                 pool_counter[Source.TIMESTAMP] %= 32
@@ -119,7 +124,7 @@ class Cmd(cmd.Cmd):
         """
         nbytes = int(arg) if arg else 8
 
-        # TODO: use this in all commands. Common place:
+        # TODO: use this in all commands. Common place: cmd.Cmd.cmdloop. Also pop last frame from backtrace
         try:
             with log_known_exception():
                 data = fortuna.random_data(nbytes)
