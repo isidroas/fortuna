@@ -13,20 +13,44 @@ import readline
 
 LOG = logging.getLogger(__name__)
 
-def configure_logging():
-    logging.basicConfig(level=logging.DEBUG)
-    logging.getLogger('urwid').setLevel(logging.INFO)
+
+def configure_logging_coloredlogs():
+    """
+    it seems not maintained. 3 years since  last change and interesting pull requests
+    """
     import coloredlogs
+
     # coloredlogs.DEFAULT_LEVEL_STYLES = {'critical': {'bold': True, 'color': 'red'}, 'debug': {'color': 7}, 'error': {'color': 'red'}, 'info': {}, 'notice': {'color': 'magenta'}, 'spam': {'color': 'green', 'faint': True}, 'success': {'bold': True, 'color': 'green'}, 'verbose': {'color': 'blue'}, 'warning': {'color': 'yellow'}}
-    coloredlogs.DEFAULT_LEVEL_STYLES['debug']= {'color': 7}
-    coloredlogs.install(level='DEBUG', fmt ='%(name)10s.%(funcName)10s:%(lineno)3d %(levelname)s %(message)s')
+    coloredlogs.DEFAULT_LEVEL_STYLES["debug"] = {"color": 7}
+    coloredlogs.install(
+        level="DEBUG",
+        fmt="%(name)10s.%(funcName)10s:%(lineno)3d %(levelname)s %(message)s",
+    )
+
+
+def configure_logging():
+    from rich.logging import RichHandler
+    import logdecorator
+
+    # downside: it can not cofigured like the standard logging.Formatter (%(funcname)..)
+    # TODO: how to remove the duplicated INFO:generator:.. and leave only the msg?
+    handler = RichHandler(
+        rich_tracebacks=True,
+        # show_time = False,
+        log_time_format="[%X]",
+        tracebacks_show_locals=True,
+        tracebacks_suppress=[cmd, logdecorator],
+    )
+    logging.basicConfig(level=logging.DEBUG, handlers=[handler])
+    logging.getLogger("urwid").setLevel(logging.INFO)
+
 
 class Source(enum.IntEnum):
     TIMESTAMP = 0
     KEY_VALUE = 1
 
 
-from accumulator import Fortuna
+from accumulator import Fortuna, FortunaSeedFileError, log_known_exception
 from generator import FortunaNotSeeded
 
 
@@ -36,12 +60,14 @@ pool_counter = {
 }
 
 import subprocess
+
+
 def get_columns():
     """
     variable $COLUMNS is not in the environment. It is a shell varible (see man bash)
     """
-    return int(subprocess.run(['tput','cols'], capture_output=True).stdout)
-    
+    return int(subprocess.run(["tput", "cols"], capture_output=True).stdout)
+
 
 @contextlib.contextmanager
 def cbreak_mode():
@@ -92,13 +118,14 @@ class Cmd(cmd.Cmd):
         random <n bytes>
         """
         nbytes = int(arg) if arg else 8
+
+        # TODO: use this in all commands. Common place:
         try:
-            data = fortuna.random_data(nbytes)
-        except FortunaNotSeeded:
-            LOG.error("Can not generate random data. Add entropy first")
-        else:
-            # print("0x%s" % data.hex().upper())
-            pass # logging already handles
+            with log_known_exception():
+                data = fortuna.random_data(nbytes)
+        except:
+            # very useful: stack is the oposite than backtrace
+            LOG.exception("something bad while returning random")
 
     def do_add_entropy(self, arg):
         """
@@ -116,12 +143,13 @@ class Cmd(cmd.Cmd):
     def do_print_seed_file(self, arg):
         file = fortuna.seed_file
         file.seek(0)
-        for line in textwrap.wrap(file.read().hex(' ', 2).upper(), width=40):
+        for line in textwrap.wrap(file.read().hex(" ", 2).upper(), width=40):
             print(line)
 
     def do_print_pools(self, arg):
         from test_format import format_pools
-        print(format_pools(fortuna.pools,width = get_columns() ))
+
+        print(format_pools(fortuna.pools, width=get_columns()))
 
     def complete_add_entropy(self, text, line, begidx, endidx):
         if not text:
@@ -142,4 +170,3 @@ if __name__ == "__main__":
         fortuna.write_seed_file()
     except FortunaNotSeeded:
         LOG.info("not writing seed file since not seeded")
-    

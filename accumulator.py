@@ -4,6 +4,7 @@ from io import IOBase
 from pathlib import Path
 from time import time
 
+import generator
 from generator import Generator, sha_double_256
 from logdecorator import log_on_start, log_on_end
 from formatter import Template
@@ -67,7 +68,7 @@ class Fortuna(object):
 
         return self.generator.pseudo_randomdata(nbytes)
 
-    @log_on_end(logging.INFO, Template('added {source!r} to pool {pool}: 0x{data:X}'))
+    @log_on_end(logging.INFO, Template("added {source!r} to pool {pool}: 0x{data:X}"))
     def add_random_event(self, source: int, pool: int, data: bytes):
         assert 1 <= len(data) <= 32
         assert 0 <= source <= 255
@@ -82,6 +83,7 @@ class Fortuna(object):
         """
         IMO this should only called by APP when seed file is empty, the first time that is seeded at least at the end
         """
+        # TODO: add __del__ method that call this or update depending on existence?
         self._overwrite_seed_file(self.random_data(64))
 
     def update_seed_file(self):
@@ -92,7 +94,7 @@ class Fortuna(object):
         self.generator.reseed(s)
         self._overwrite_seed_file(self.random_data(64))
 
-    @log_on_end(logging.DEBUG,Template('read seed file 0x{result:50X}'))
+    @log_on_end(logging.DEBUG, Template("read seed file 0x{result:50X}"))
     def _read_seed_file(self):
         self.seed_file.seek(0)
         s = self.seed_file.read()
@@ -102,8 +104,20 @@ class Fortuna(object):
             msg = "file size is %d instead of 64" % len(s)
             raise FortunaSeedFileError(msg)
         return s
-        
-    @log_on_end(logging.DEBUG,Template('write seed file 0x{data:50X}'))
+
+    @log_on_end(logging.DEBUG, Template("write seed file 0x{data:50X}"))
     def _overwrite_seed_file(self, data):
         self.seed_file.seek(0)
         self.seed_file.write(data)
+
+
+import contextlib
+
+
+@contextlib.contextmanager
+def log_known_exception():
+    try:
+        with generator.log_known_exception():
+            yield
+    except FortunaSeedFileError as e:
+        LOG.error(str(e))

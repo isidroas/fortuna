@@ -3,6 +3,7 @@ import math
 from hashlib import sha256
 
 from logdecorator import log_on_start, log_on_end
+
 LOG = logging.getLogger(__name__)
 from formatter import Template
 
@@ -33,8 +34,10 @@ class Generator(object):
         self.key = sha_double_256(self.key + seed)
         self.counter += 1
 
-    @log_on_start(logging.DEBUG, 'requested {blocks} block(s)')
-    @log_on_end(logging.DEBUG, Template('generated blocks 0x{result:X}')) # propose to lib  {funcName} or %(funcName) ? bug to lib %(funcName) is 'log'
+    @log_on_start(logging.DEBUG, "requested {blocks} block(s)")
+    @log_on_end(
+        logging.DEBUG, Template("generated blocks 0x{result:X}")
+    )  # propose to lib  {funcName} or %(funcName) ? bug to lib %(funcName) is 'log'
     def generate_blocks(self, blocks: int) -> bytes:
         if self.counter == 0:
             raise FortunaNotSeeded("Generate error, PRNG not seeded yet")
@@ -44,8 +47,8 @@ class Generator(object):
             self.counter += 1
         return r
 
-    @log_on_start(logging.INFO, 'requested {nbytes} byte(s)')
-    @log_on_end(logging.INFO, Template('generated random 0x{result:X}'))
+    @log_on_start(logging.INFO, "requested {nbytes} byte(s)")
+    @log_on_end(logging.INFO, Template("generated random 0x{result:X}"))
     def pseudo_randomdata(self, nbytes: int) -> bytes:
         assert 0 <= nbytes <= 2**20
         r = self.generate_blocks(math.ceil(nbytes / 16))[:nbytes]
@@ -58,7 +61,7 @@ class Generator(object):
 
     @key.setter
     def key(self, value: bytes):
-        LOG.info('key set to 0x%s'% value.hex().upper())
+        LOG.info("key set to 0x%s" % value.hex().upper())
         self._key = value
 
     @property
@@ -67,5 +70,16 @@ class Generator(object):
 
     @counter.setter
     def counter(self, value: int):
-        LOG.info('counter set to %d'% value)
+        LOG.debug("counter set to %d" % value)
         self._counter = value
+
+
+import contextlib
+
+
+@contextlib.contextmanager
+def log_known_exception():
+    try:
+        yield
+    except FortunaNotSeeded as e:
+        LOG.error(str(e))
