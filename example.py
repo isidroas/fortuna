@@ -99,9 +99,9 @@ def add_entropy(source=Source.KEY_VALUE):
                 pool_counter[Source.KEY_VALUE] += 1
                 pool_counter[Source.KEY_VALUE] %= 32
             elif source is Source.TIMESTAMP:
+                assert time.clock_getres(time.CLOCK_MONOTONIC_RAW) >= 1e-9
                 nanoseconds = time.clock_gettime_ns(time.CLOCK_MONOTONIC_RAW)
                 seconds = int(nanoseconds/1e9)
-
                 nbytes = math.ceil(int(1e9).bit_length() / 8)
                 from datetime import datetime
                 fortuna.add_random_event(
