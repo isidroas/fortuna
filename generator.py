@@ -5,7 +5,7 @@ from hashlib import sha256
 from logdecorator import log_on_start, log_on_end
 
 LOG = logging.getLogger(__name__)
-from formatter import Template
+from formatter import Template, log_trace
 
 from cryptography.hazmat.primitives import ciphers
 
@@ -49,8 +49,9 @@ class Generator(object):
 
     # @log_on_start(logging.INFO, "requested {nbytes} byte(s)")
     # @log_on_end(logging.INFO, Template("generated random 0x{result:X}"))
-    @log_on_start(logging.DEBUG, Template("{self.__class__.__name__}.{callable.__name__}(bytes={nbytes})"))
-    @log_on_end(logging.DEBUG, Template("{self.__class__.__name__}.{callable.__name__}(bytes={nbytes}) -> 0x{result:X}"))
+    # @log_on_start(logging.DEBUG, Template("{self.__class__.__name__}.{callable.__name__}(bytes={nbytes})"))
+    # @log_on_end(logging.DEBUG, Template("{self.__class__.__name__}.{callable.__name__}(bytes={nbytes}) -> 0x{result:X}"))
+    @log_trace('bytes={nbytes}','0x{result:X}')
     def pseudo_randomdata(self, nbytes: int) -> bytes:
         assert 0 <= nbytes <= 2**20
         r = self.generate_blocks(math.ceil(nbytes / 16))[:nbytes]

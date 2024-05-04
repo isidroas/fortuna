@@ -124,7 +124,7 @@ def log_trace(args_fmt='', ret_fmt='', log_start=True, log_end=True):
                 meth2 = log_on_error(logging.DEBUG, Template(fmt + ' ⚡{e!r}'), on_exceptions=Exception)(meth2)
             nesting+=1
             try:
-                meth2(*args, **kwargs)
+                return meth2(*args, **kwargs)
             finally:
                 nesting-=1
         return wrapper
