@@ -1,4 +1,3 @@
-import os
 import math
 import contextlib
 import enum
@@ -42,7 +41,11 @@ def configure_logging():
         tracebacks_show_locals=True,
         tracebacks_suppress=[cmd, logdecorator],
     )
-    logging.basicConfig(level=logging.DEBUG, handlers=[handler])
+    logging.basicConfig(
+        level=logging.DEBUG,
+        handlers=[handler],
+        format="%(message)s",
+    )
     logging.getLogger("urwid").setLevel(logging.INFO)
 
 
@@ -101,13 +104,13 @@ def add_entropy(source=Source.KEY_VALUE):
             elif source is Source.TIMESTAMP:
                 assert time.clock_getres(time.CLOCK_MONOTONIC_RAW) >= 1e-9
                 nanoseconds = time.clock_gettime_ns(time.CLOCK_MONOTONIC_RAW)
-                seconds = int(nanoseconds/1e9)
+                seconds = int(nanoseconds / 1e9)
                 nbytes = math.ceil(int(1e9).bit_length() / 8)
-                from datetime import datetime
+
                 fortuna.add_random_event(
                     Source.TIMESTAMP,
                     pool_counter[Source.TIMESTAMP],
-                    int(nanoseconds - seconds * 1e9).to_bytes(nbytes, "little")
+                    int(nanoseconds - seconds * 1e9).to_bytes(nbytes, "little"),
                 )
                 pool_counter[Source.TIMESTAMP] += 1
                 pool_counter[Source.TIMESTAMP] %= 32
@@ -127,7 +130,9 @@ class Cmd(cmd.Cmd):
         # TODO: use this in all commands. Common place: cmd.Cmd.cmdloop. Also pop last frame from backtrace
         try:
             with log_known_exception():
-                data = fortuna.random_data(nbytes)
+                # don't doing anything with the return value because library
+                # logging already displays it
+                fortuna.random_data(nbytes)
         except:
             # very useful: stack is the oposite than backtrace
             LOG.exception("something bad while returning random")
