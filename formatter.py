@@ -108,6 +108,7 @@ nesting = 0
 from typing import Callable
 from logdecorator import log_on_end, log_on_start, log_on_error
 import logging
+#TODO: change name to trace_method
 def log_trace(args_fmt='', ret_fmt='', log_start=True, log_end=True):
 
     def decorator(meth: Callable):
@@ -130,6 +131,7 @@ def log_trace(args_fmt='', ret_fmt='', log_start=True, log_end=True):
         return wrapper
     return decorator
 
+#TODO: change name to trace_property
 def log_property():
     def decorator(meth: Callable):
 

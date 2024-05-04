@@ -5,7 +5,7 @@ from hashlib import sha256
 from logdecorator import log_on_start, log_on_end
 
 LOG = logging.getLogger(__name__)
-from formatter import Template, log_trace
+from formatter import Template, log_trace, log_property
 
 from cryptography.hazmat.primitives import ciphers
 
@@ -72,9 +72,10 @@ class Generator(object):
         return self._counter
 
     @counter.setter
+    @log_property()
     def counter(self, value: int):
         # LOG.debug("counter set to %d" % value)
-        LOG.debug("%s.counter=%d",self.__class__.__name__, value)
+        # LOG.debug("%s.counter=%d",self.__class__.__name__, value)
         self._counter = value
 
 
