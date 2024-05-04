@@ -6,7 +6,7 @@ from time import time
 
 import generator
 from generator import Generator, sha_double_256
-from logdecorator import log_on_start, log_on_end
+from logdecorator import log_on_start, log_on_end, log_on_error
 from formatter import Template
 
 MINPOOLSIZE = 64
@@ -94,7 +94,9 @@ class Fortuna(object):
         self.generator.reseed(s)
         self._overwrite_seed_file(self.random_data(64))
 
-    @log_on_end(logging.DEBUG, Template("read seed file 0x{result:50X}"))
+    # @log_on_end(logging.DEBUG, Template("read seed file 0x{result:50X}"))
+    @log_on_end(logging.DEBUG, Template("{self.__class__.__name__}.{callable.__name__}() -> 0x{result:50X}"))
+    @log_on_error(logging.DEBUG, Template("{self.__class__.__name__}.{callable.__name__}() -> ''"), on_exceptions=FortunaSeedFileEmpty)
     def _read_seed_file(self):
         self.seed_file.seek(0)
         s = self.seed_file.read()
@@ -105,7 +107,8 @@ class Fortuna(object):
             raise FortunaSeedFileError(msg)
         return s
 
-    @log_on_end(logging.DEBUG, Template("write seed file 0x{data:50X}"))
+    # @log_on_end(logging.DEBUG, Template("write seed file 0x{data:50X}"))
+    @log_on_end(logging.DEBUG, Template("{self.__class__.__name__}.{callable.__name__}('0x{data:50X}')"))
     def _overwrite_seed_file(self, data):
         self.seed_file.seek(0)
         self.seed_file.write(data)

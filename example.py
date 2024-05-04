@@ -33,18 +33,18 @@ def configure_logging():
     import logdecorator
 
     # downside: it can not cofigured like the standard logging.Formatter (%(funcname)..)
-    # TODO: how to remove the duplicated INFO:generator:.. and leave only the msg?
     handler = RichHandler(
         rich_tracebacks=True,
         # show_time = False,
         log_time_format="[%X]",
         tracebacks_show_locals=True,
         tracebacks_suppress=[cmd, logdecorator],
+        show_path=False, # it has less info using logdecorator. I can't overwirte %(module)s:%(lineno) even with functools.wrap
     )
     logging.basicConfig(
         level=logging.DEBUG,
         handlers=[handler],
-        format="%(message)s",
+        format="%(relativeCreated)d %(message)s",
     )
     logging.getLogger("urwid").setLevel(logging.INFO)
 
@@ -114,8 +114,6 @@ def add_entropy(source=Source.KEY_VALUE):
                 )
                 pool_counter[Source.TIMESTAMP] += 1
                 pool_counter[Source.TIMESTAMP] %= 32
-
-        # TODO: call add_random_event here, only once?
 
 
 class Cmd(cmd.Cmd):

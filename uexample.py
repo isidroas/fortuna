@@ -6,11 +6,10 @@ LOG = logging.getLogger(__name__)
 
 
 def configure_logging(events: u.ListBox):
-    # logging.root.addHandler()
     handler = UrwidHandler(events)
     logging.basicConfig(level=logging.DEBUG, handlers=[handler])
     # Excluding urwid debug.
-    # However, sometime it is useful to see keypresses and their symbols
+    # However, sometimes it is useful to see keypresses and their symbols
     logging.getLogger('urwid').setLevel(logging.INFO)
 
 class UrwidHandler(logging.Handler):
