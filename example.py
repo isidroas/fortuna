@@ -17,6 +17,7 @@ LOG = logging.getLogger(__name__)
 def configure_logging_coloredlogs():
     """
     it seems not maintained. 3 years since  last change and interesting pull requests
+    TODO: try https://github.com/borntyping/python-colorlog
     """
     import coloredlogs
 
@@ -110,6 +111,7 @@ def add_entropy(source=Source.KEY_VALUE):
                 fortuna.add_random_event(
                     Source.TIMESTAMP,
                     pool_counter[Source.TIMESTAMP],
+                    # only add nanosecond portion
                     int(nanoseconds - seconds * 1e9).to_bytes(nbytes, "little"),
                 )
                 pool_counter[Source.TIMESTAMP] += 1

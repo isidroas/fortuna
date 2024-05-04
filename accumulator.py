@@ -6,7 +6,7 @@ from time import time
 
 import generator
 from generator import Generator, sha_double_256
-from logdecorator import log_on_start, log_on_end, log_on_error
+from logdecorator import log_on_start, log_on_end, log_on_error, log_exception
 from formatter import Template
 
 MINPOOLSIZE = 64
@@ -21,6 +21,7 @@ class FortunaSeedFileEmpty(FortunaSeedFileError): ...
 
 
 class Fortuna(object):
+    @log_on_start(logging.DEBUG, Template("{self.__class__.__name__}.{callable.__name__}(seed_file=\"{seed_file}\")"))
     def __init__(self, seed_file: IOBase | Path | None = None):
         self.pools = [bytearray() for i in range(32)]
         self.reseed_cnt = 0
@@ -96,7 +97,8 @@ class Fortuna(object):
 
     # @log_on_end(logging.DEBUG, Template("read seed file 0x{result:50X}"))
     @log_on_end(logging.DEBUG, Template("{self.__class__.__name__}.{callable.__name__}() -> 0x{result:50X}"))
-    @log_on_error(logging.DEBUG, Template("{self.__class__.__name__}.{callable.__name__}() -> ''"), on_exceptions=FortunaSeedFileEmpty)
+    @log_on_error(logging.DEBUG, Template("{self.__class__.__name__}.{callable.__name__}() ⚡{e!r}"), on_exceptions=FortunaSeedFileEmpty)
+    # @log_exception(Template("{self.__class__.__name__}.{callable.__name__}() -> caca{e!r}tut"), on_exceptions=FortunaSeedFileEmpty)
     def _read_seed_file(self):
         self.seed_file.seek(0)
         s = self.seed_file.read()

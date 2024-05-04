@@ -101,3 +101,48 @@ class Template(UserString):
     def format(self_, *args, **kwargs):
         fmt = Formatter()
         return fmt.format(str(self_), *args, **kwargs)
+
+# global var. This is not thread safe
+nesting = 0
+
+from typing import Callable
+from logdecorator import log_on_end, log_on_start, log_on_error
+import logging
+def log_trace(args_fmt='', ret_fmt='', log_start=True, log_end=True):
+
+    def decorator(meth: Callable):
+
+        def wrapper(*args, **kwargs):
+            global nesting
+            indent = ' ' * nesting
+            fmt="%s{self.__class__.__name__}.{callable.__name__}(%s)" % (indent, args_fmt)
+            meth2 = meth
+            if log_start:
+                meth2 = log_on_start(logging.DEBUG, Template(fmt))(meth2) # TODO: inficient; do outside wrapper
+            if log_end:
+                meth2 = log_on_end(logging.DEBUG, Template(fmt + '-> ' + ret_fmt))(meth2)
+                meth2 = log_on_error(logging.DEBUG, Template(fmt + ' ⚡{e!r}'), on_exceptions=Exception)(meth2)
+            nesting+=1
+            try:
+                meth2(*args, **kwargs)
+            finally:
+                nesting-=1
+        return wrapper
+    return decorator
+
+def log_property():
+    def decorator(meth: Callable):
+
+        def wrapper(self, value):
+            global nesting
+            indent = ' ' * nesting
+            nesting+=1
+            
+            logging.debug('%s%s.%s=%s',indent, type(self).__name__, meth.__name__, value)
+            meth(self, value)
+            # TODO: handle exceptions
+            nesting-=1
+        return wrapper
+
+    return decorator
+    
