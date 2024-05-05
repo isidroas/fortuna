@@ -6,7 +6,7 @@ from time import time
 
 import generator
 from generator import Generator, sha_double_256
-from formatter import Template, log_trace
+from formatter import Template, log_trace, log_property
 
 MINPOOLSIZE = 64
 
@@ -63,7 +63,9 @@ class Fortuna(object):
             self.generator.reseed(s)
             self.last_seed = time()
 
-        # # commented because the exception will be already raised in generator.pseudo_randomdata
+        # # this is 2 lines are from the pseoudocode of the book. Commented because:
+        # #   - the exception will be already raised in generator.pseudo_randomdata
+        # #   - it could be seeded through file and the counter remains 0
         # if self.reseed_cnt == 0:
         #     raise FortunaNotSeeded("Generate error, PRNG not seeded yet")
 
@@ -75,10 +77,13 @@ class Fortuna(object):
         assert 0 <= source <= 255
         assert 0 <= pool <= 31
         self.pools[pool] += bytes([source, len(data)]) + data
-        # not doing the hash here:
-        #  x it is a waste of memory
-        #  ✓ save time to entropy sources, which are typically real-time drivers
-        #  ✓ simpler because you don't have to maintain a counter, just do `len(pool)`
+        # Even though book says "Implementations do not need to store the
+        # unbounded string, but can computethe hash of the string incrementally
+        # as it is assembled in the pool" not doing the hash here:
+        #   x it is a waste of memory
+        #   ✓ save time to entropy sources, which are typically real-time drivers
+        #   ✓ simpler because you don't have to maintain a counter, just do `len(pool)`
+        #   ✓ easier to debug since you can see the history
 
     def write_seed_file(self):
         """
@@ -111,6 +116,14 @@ class Fortuna(object):
         self.seed_file.seek(0)
         self.seed_file.write(data)
 
+    @property
+    def reseed_cnt(self):
+        return self._reseed_cnt
+
+    @reseed_cnt.setter
+    @log_property()
+    def reseed_cnt(self, value: int):
+        self._reseed_cnt = value
 
 import contextlib
 

@@ -15,7 +15,8 @@ Examples only tested in Linux, but they should work also in macOS.
     - `func (acc *Accumulator) addRandomEvent(source uint8, seq uint, data []byte)`
       It accepts a sequence number instead of pool index.
     - `func (acc *Accumulator) allocateSource() uint8`
-      To ease that 2 sources doesn't share the same identifier
+      To ease that 2 sources doesn't share the same identifier.
+      In line with the book: *allocate source numbers statically or dinamically*
     - `func (acc *Accumulator) NewEntropyDataSink() chan<- []byte`
     - `func (acc *Accumulator) NewEntropyTimeStampSink() chan<- time.Time`
 - [pycrypto/Fortuna](https://github.com/pycrypto/pycrypto/tree/65b43bd4ffe2a48bdedae986b1a291f5a2cc7df7/lib/Crypto/Random/Fortuna)
