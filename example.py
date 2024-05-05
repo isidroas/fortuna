@@ -45,7 +45,8 @@ def configure_logging():
     logging.basicConfig(
         level=logging.DEBUG,
         handlers=[handler],
-        format="%(relativeCreated)d %(message)s",
+        # format="%(relativeCreated)d %(message)s",
+        format="%(message)s",
     )
     logging.getLogger("urwid").setLevel(logging.INFO)
 

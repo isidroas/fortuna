@@ -132,7 +132,7 @@ def log_trace(args_fmt='', ret_fmt='', log_start=True, log_end=True):
     return decorator
 
 #TODO: change name to trace_property
-def log_property():
+def log_property(fmt=None):
     def decorator(meth: Callable):
 
         def wrapper(self, value):
@@ -140,7 +140,11 @@ def log_property():
             indent = ' ' * nesting
             nesting+=1
             
-            logging.debug('%s%s.%s=%s',indent, type(self).__name__, meth.__name__, value)
+            if fmt is not None:
+                val = Template(fmt).format(value)
+            else:
+                val = str(value)
+            logging.debug('%s%s.%s=%s',indent, type(self).__name__, meth.__name__, val)
             meth(self, value)
             # TODO: handle exceptions
             nesting-=1
