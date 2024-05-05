@@ -95,7 +95,7 @@ class Fortuna(object):
         self.generator.reseed(s)
         self._overwrite_seed_file(self.random_data(64))
 
-    @log_trace("", "0x{result:50X}")
+    @log_trace("", "0x{result:50X}", log_start=False)
     def _read_seed_file(self):
         self.seed_file.seek(0)
         s = self.seed_file.read()

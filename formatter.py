@@ -109,6 +109,7 @@ from typing import Callable
 from logdecorator import log_on_end, log_on_start, log_on_error
 import logging
 #TODO: change name to trace_method
+#TODO: automatic format when None
 def log_trace(args_fmt='', ret_fmt='', log_start=True, log_end=True):
 
     def decorator(meth: Callable):
