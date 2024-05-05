@@ -2,8 +2,6 @@ import logging
 import math
 from hashlib import sha256
 
-from logdecorator import log_on_start, log_on_end
-
 LOG = logging.getLogger(__name__)
 from formatter import Template, log_trace, log_property
 
