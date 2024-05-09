@@ -33,7 +33,13 @@ def _get_templates(n_pools, n_sources, width):
 
     return template, pointer_template, hex_width
     
-def format_overflow(data: bytes, max_width):
+from enum import StrEnum, auto
+class Trim(StrEnum):
+    LEFT = auto()
+    CENTER = auto()
+    RIGHT = auto()
+
+def format_overflow(data: str, max_width, trim = Trim.LEFT):
     """
     >>> format_overflow('3031323334', max_width = 10)
     '3031323334'
@@ -43,6 +49,14 @@ def format_overflow(data: bytes, max_width):
     '(+4)...34'
     >>> format_overflow('3031323334353637383930', max_width = 10)
     '(+10)...30'
+
+    >>> format_overflow('30313233343536373839', max_width = 18, trim='left')
+    '(+5 )...3536373839'
+    >>> format_overflow('30313233343536373839', max_width = 18, trim='right')
+    '3031323334...(+5 )'
+
+    # >>> format_overflow('30313233343536373839', max_width = 18, trim='center')
+    # '3031...(+5 )..3839'
     """
     if len(data)<= max_width:
         return data
@@ -52,7 +66,11 @@ def format_overflow(data: bytes, max_width):
 
     fmt ='(+{: <%d})'% len(str(len_bytes))
     remaining = max_width - len(fmt.format(0))
-    fmt += '...' if remaining%2 else '..'
+    dots = '...' if remaining%2 else '..'
+    if trim == Trim.LEFT:
+        fmt += dots
+    else:
+        fmt = dots + fmt
     remaining = max_width - len(fmt.format(0))
 
     remaining_bytes, rest = divmod(remaining, 2)
@@ -60,7 +78,10 @@ def format_overflow(data: bytes, max_width):
 
     # print(remaining)
     # print(len(fmt.format(0)))
-    return fmt.format(len_bytes-remaining_bytes) + data[-remaining:]
+    remaining_info = fmt.format(len_bytes-remaining_bytes)
+    if trim == Trim.LEFT:
+        return  remaining_info+ data[-remaining:]
+    return  data[:remaining] + remaining_info
 
 
 def format_pools(pools, sources=(), width = 27):
