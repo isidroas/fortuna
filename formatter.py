@@ -1,4 +1,3 @@
-
 def _get_sources(pool_index, sources):
     """
     >>> list(_get_sources(2, (1, 2, 0, 2)))
@@ -12,7 +11,7 @@ def _get_sources(pool_index, sources):
     while source is not None:
         yield source
         try:
-            source = sources.index(pool_index, source+1)
+            source = sources.index(pool_index, source + 1)
         except ValueError:
             source = None
 
@@ -26,20 +25,26 @@ def _get_templates(n_pools, n_sources, width):
     '{: <1}: 0x{: <6}'
     """
 
-    pointer_template = (' <- {: <%d}' %  len(','.join(' ' * n_sources))) if n_sources else ''
-    template = '{: <%d}: 0x' % (2 if n_pools>10 else 1)
-    hex_width =  width - len(template.format('')) - len(pointer_template.format(''))
-    template += '{: <%d}' % hex_width
+    pointer_template = (
+        (" <- {: <%d}" % len(",".join(" " * n_sources))) if n_sources else ""
+    )
+    template = "{: <%d}: 0x" % (2 if n_pools > 10 else 1)
+    hex_width = width - len(template.format("")) - len(pointer_template.format(""))
+    template += "{: <%d}" % hex_width
 
     return template, pointer_template, hex_width
-    
+
+
 from enum import StrEnum, auto
+
+
 class Trim(StrEnum):
     LEFT = auto()
     CENTER = auto()
     RIGHT = auto()
 
-def format_overflow(data: str, max_width, trim = Trim.LEFT):
+
+def format_overflow(data: str, max_width, trim=Trim.LEFT):
     """
     >>> format_overflow('3031323334', max_width = 10)
     '3031323334'
@@ -58,15 +63,15 @@ def format_overflow(data: str, max_width, trim = Trim.LEFT):
     >>> format_overflow('30313233343536373839', max_width = 18, trim='center')
     '3031...(+5 )3839'
     """
-    if len(data)<= max_width:
+    if len(data) <= max_width:
         return data
 
-    len_bytes, rest = divmod(len(data),2)
-    assert rest==0, 'not hexa'
+    len_bytes, rest = divmod(len(data), 2)
+    assert rest == 0, "not hexa"
 
-    fmt ='(+{: <%d})'% len(str(len_bytes))
+    fmt = "(+{: <%d})" % len(str(len_bytes))
     remaining = max_width - len(fmt.format(0))
-    dots = '...' if remaining%2 else '..'
+    dots = "..." if remaining % 2 else ".."
     if trim == Trim.LEFT:
         fmt += dots
     else:
@@ -74,56 +79,91 @@ def format_overflow(data: str, max_width, trim = Trim.LEFT):
     remaining = max_width - len(fmt.format(0))
 
     remaining_bytes, rest = divmod(remaining, 2)
-    assert rest==0
+    assert rest == 0
 
     # print(remaining)
     # print(len(fmt.format(0)))
-    remaining_info = fmt.format(len_bytes-remaining_bytes)
+    remaining_info = fmt.format(len_bytes - remaining_bytes)
     if trim == Trim.LEFT:
-        return  remaining_info+ data[-remaining:]
+        return remaining_info + data[-remaining:]
     elif trim == Trim.CENTER:
         # avoid unpair an hexa byte
         half, rest = divmod(remaining_bytes, 2)
-        return data[:(half+rest)*2] + remaining_info + data[-half*2:]
-    return  data[:remaining] + remaining_info
+        return data[: (half + rest) * 2] + remaining_info + data[-half * 2 :]
+    return data[:remaining] + remaining_info
 
 
-def format_pools(pools, sources=(), width = 27):
+def format_pools(pools, sources=(), width=27):
     """
     format is:
 
         number_of_pool: 0xCAFEE     <- source1, source2
     """
-    template, pointer_template, hex_width = _get_templates(len(pools), len(sources), width)
-    res =''
+    template, pointer_template, hex_width = _get_templates(
+        len(pools), len(sources), width
+    )
+    res = ""
     for index, pool in enumerate(pools):
         data = pool.hex().upper()
-        res+=template.format(index, format_overflow(data, hex_width))
+        res += template.format(index, format_overflow(data, hex_width))
         sources_pointing = list(_get_sources(index, sources))
         if sources_pointing:
-            res += pointer_template.format(','.join(str(i) for i in sources_pointing))
-        res+='\n'
+            res += pointer_template.format(",".join(str(i) for i in sources_pointing))
+        res += "\n"
     return res
+
 
 import string
 from functools import partial
+import re
+
+PATTERN = re.compile(r"(?P<align>=)?(?P<width>\d*)?X")
+
+
 class Formatter(string.Formatter):
     def format_field(self, value, format_spec):
         if isinstance(value, (bytes, bytearray)):
-            if format_spec.endswith('X'):
+            if match := PATTERN.search(format_spec):
                 format_spec = format_spec[:-1]
                 value = value.hex().upper()
-            if format_spec.isdigit():
-                value = format_overflow(value, int(format_spec))
-                format_spec = ''
+                if width := match.group("width"):
+                    align = Trim.LEFT
+                    align = {
+                        "<": Trim.LEFT,
+                        ">": Trim.RIGHT,
+                        "^": Trim.CENTER,
+                        None: Trim.LEFT,
+                    }[match.group("align")]
+                    value = format_overflow(value, int(format_spec))
         return super().format_field(value, format_spec)
 
+
 from collections import UserString
+
+
 class Template(UserString):
     """
     inspired in https://github.com/mkdocs/mkdocs/blob/53fec50e57f6bad152ad589a83ae83d1cd72b2f5/mkdocs/config/config_options.py#L640
     """
+
     def format(self_, *args, **kwargs):
         fmt = Formatter()
         return fmt.format(str(self_), *args, **kwargs)
 
+
+def test_formatter():
+    fmt = Formatter()
+    assert "0x0102" == fmt.format("0x{:X}", b"\x01\x02")
+
+    b = bytes.fromhex("30313233343536373839")
+    assert "0x" + format_overflow(b.hex().upper(), 18) == fmt.format("0x{:18X}", b)
+
+
+def test_regex():
+    m = PATTERN.match("50")
+    assert m is None
+
+    m = PATTERN.match("50X")
+    assert m.group("align") is None
+    assert m.group("width") == "50"
+    # assert m.group('format') == 'X'
