@@ -27,8 +27,7 @@ def trace_method(args_fmt='', ret_fmt='', log_start=True, log_end=True):
             if log_start:
                 meth2 = log_on_start(logging.DEBUG, Template(fmt))(meth2) # TODO: inficient; do outside wrapper
             if log_end:
-                if log_start:
-                    # won't work if indent == ''
+                if log_start and indent!='':
                     fmt_list = list(fmt)
                     fmt_list[len(indent)-2] = '⮑'
                     fmt = ''.join(fmt_list)
@@ -54,8 +53,7 @@ def trace_function(args_fmt='', ret_fmt='', log_start=True, log_end=True):
             if log_start:
                 meth2 = log_on_start(logging.DEBUG, Template(fmt))(meth2) # TODO: inficient; do outside wrapper
             if log_end:
-                if log_start:
-                    # won't work if indent == ''
+                if log_start and indent!='':
                     fmt_list = list(fmt)
                     fmt_list[len(indent)-2] = '⮑'
                     fmt = ''.join(fmt_list)

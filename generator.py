@@ -11,13 +11,16 @@ from cryptography.hazmat.primitives import ciphers
 
 class FortunaNotSeeded(Exception): ...
 
+@trace_function('key=0x{key:25X}, plaintext=0x{plaintext:25X}', '0x{result:25X}', log_start=False)
+def _encrypt(key: bytes, plaintext: bytes) -> bytes:
+    cipher = ciphers.Cipher(ciphers.algorithms.AES(key), mode=ciphers.modes.ECB())
+    encryptor = cipher.encryptor()
+    return encryptor.update(plaintext)
 
 def encrypt(key: bytes, counter: int) -> bytes:
     # TODO: separate construction and encryption to save time in key scheduling?
     # TODO: use https://cryptography.io/en/latest/hazmat/primitives/symmetric-encryption/#cryptography.hazmat.primitives.ciphers.modes.CTR ?
-    cipher = ciphers.Cipher(ciphers.algorithms.AES(key), mode=ciphers.modes.ECB())
-    encryptor = cipher.encryptor()
-    return encryptor.update(counter.to_bytes(16, "little"))
+    return _encrypt(key, counter.to_bytes(16, "little"))
 
 
 @trace_function('data=0x{data:25X}', 'res=0x{result:25X}', log_start=False)
