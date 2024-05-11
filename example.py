@@ -28,9 +28,9 @@ def configure_logging_coloredlogs():
         fmt="%(name)10s.%(funcName)10s:%(lineno)3d %(levelname)s %(message)s",
     )
 
-
 def configure_logging():
     from rich.logging import RichHandler
+    from formatter import ReprHighlighter
     import logdecorator
 
     # downside: it can not cofigured like the standard logging.Formatter (%(funcname)..)
@@ -40,6 +40,7 @@ def configure_logging():
         log_time_format="[%X]",
         tracebacks_show_locals=True,
         tracebacks_suppress=[cmd, logdecorator],
+        highlighter=ReprHighlighter(),
         show_path=False, # it has less info using logdecorator. I can't overwirte %(module)s:%(lineno) even with functools.wrap
     )
     logging.basicConfig(
