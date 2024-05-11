@@ -7,7 +7,7 @@ from time import time
 import generator
 from generator import Generator, sha_double_256
 from formatter import Template
-from tracer import  log_trace, log_property
+from tracer import  trace_method, trace_property
 
 MINPOOLSIZE = 64
 
@@ -21,7 +21,7 @@ class FortunaSeedFileEmpty(FortunaSeedFileError): ...
 
 
 class Fortuna(object):
-    @log_trace('seed_file="{seed_file}"')
+    @trace_method('seed_file="{seed_file}"')
     def __init__(self, seed_file: IOBase | Path | None = None):
         self.pools = [bytearray() for i in range(32)]
         self.reseed_cnt = 0
@@ -72,7 +72,7 @@ class Fortuna(object):
 
         return self.generator.pseudo_randomdata(nbytes)
 
-    @log_trace("source={source!r}, pool={pool}, data=0x{data:X}", log_end=False)
+    @trace_method("source={source!r}, pool={pool}, data=0x{data:X}", log_end=False)
     def add_random_event(self, source: int, pool: int, data: bytes):
         assert 1 <= len(data) <= 32
         assert 0 <= source <= 255
@@ -101,7 +101,7 @@ class Fortuna(object):
         self.generator.reseed(s)
         self._overwrite_seed_file(self.random_data(64))
 
-    @log_trace("", "0x{result:50X}", log_start=False)
+    @trace_method("", "0x{result:50X}", log_start=False)
     def _read_seed_file(self):
         self.seed_file.seek(0)
         s = self.seed_file.read()
@@ -112,7 +112,7 @@ class Fortuna(object):
             raise FortunaSeedFileError(msg)
         return s
 
-    @log_trace('"0x{data:50X}"', log_end=False)
+    @trace_method('"0x{data:50X}"', log_end=False)
     def _overwrite_seed_file(self, data):
         self.seed_file.seek(0)
         self.seed_file.write(data)
@@ -122,7 +122,7 @@ class Fortuna(object):
         return self._reseed_cnt
 
     @reseed_cnt.setter
-    @log_property()
+    @trace_property()
     def reseed_cnt(self, value: int):
         self._reseed_cnt = value
 
