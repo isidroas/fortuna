@@ -6,7 +6,8 @@ from time import time
 
 import generator
 from generator import Generator, sha_double_256
-from formatter import Template, log_trace, log_property
+from formatter import Template
+from tracer import  log_trace, log_property
 
 MINPOOLSIZE = 64
 

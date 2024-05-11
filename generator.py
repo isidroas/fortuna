@@ -3,7 +3,8 @@ import math
 from hashlib import sha256
 
 LOG = logging.getLogger(__name__)
-from formatter import Template, log_trace, log_property
+from formatter import Template
+from tracer import log_trace, log_property
 
 from cryptography.hazmat.primitives import ciphers
 
