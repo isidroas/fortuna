@@ -11,7 +11,7 @@ from cryptography.hazmat.primitives import ciphers
 
 class FortunaNotSeeded(Exception): ...
 
-@trace_function('key=0x{key:25X}, plaintext=0x{plaintext:25X}', '0x{result:25X}', log_start=False)
+@trace_function('key=0x{key:25X}, plaintext=0x{plaintext:>25X}', '0x{result:^25X}', log_start=False)
 def _encrypt(key: bytes, plaintext: bytes) -> bytes:
     # TODO: separate construction and encryption to save time in key scheduling?
     # TODO: use https://cryptography.io/en/latest/hazmat/primitives/symmetric-encryption/#cryptography.hazmat.primitives.ciphers.modes.CTR ?
@@ -38,7 +38,7 @@ class Generator(object):
         self.key = sha_double_256(self.key + seed)
         self.counter += 1
 
-    @trace_method('blocks={blocks}','0x{result:50X}')
+    @trace_method('blocks={blocks}','0x{result:^50X}')
     def generate_blocks(self, blocks: int) -> bytes:
         if self.counter == 0:
             raise FortunaNotSeeded("Generate error, PRNG not seeded yet")

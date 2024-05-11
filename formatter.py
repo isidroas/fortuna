@@ -117,14 +117,14 @@ import string
 from functools import partial
 import re
 
-PATTERN = re.compile(r"(?P<align>=)?(?P<width>\d*)?X")
+PATTERN = re.compile(r"(?P<align>=<|\^|>)?(?P<width>\d*)?X")
 
 
 class Formatter(string.Formatter):
     def format_field(self, value, format_spec):
         if isinstance(value, (bytes, bytearray)):
             if match := PATTERN.search(format_spec):
-                format_spec = format_spec[:-1]
+                format_spec = format_spec[:match.start()] + format_spec[match.end():]
                 value = value.hex().upper()
                 if width := match.group("width"):
                     align = Trim.LEFT
@@ -134,7 +134,7 @@ class Formatter(string.Formatter):
                         "^": Trim.CENTER,
                         None: Trim.LEFT,
                     }[match.group("align")]
-                    value = format_overflow(value, int(format_spec))
+                    value = format_overflow(value, int(width), align)
         return super().format_field(value, format_spec)
 
 
@@ -157,6 +157,7 @@ def test_formatter():
 
     b = bytes.fromhex("30313233343536373839")
     assert "0x" + format_overflow(b.hex().upper(), 18) == fmt.format("0x{:18X}", b)
+    assert "0x" + format_overflow(b.hex().upper(), 18, 'right') == fmt.format("0x{:>18X}", b)
 
 
 def test_regex():
