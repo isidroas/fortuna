@@ -55,8 +55,8 @@ def format_overflow(data: str, max_width, trim = Trim.LEFT):
     >>> format_overflow('30313233343536373839', max_width = 18, trim='right')
     '3031323334...(+5 )'
 
-    # >>> format_overflow('30313233343536373839', max_width = 18, trim='center')
-    # '3031...(+5 )..3839'
+    >>> format_overflow('30313233343536373839', max_width = 18, trim='center')
+    '3031...(+5 )3839'
     """
     if len(data)<= max_width:
         return data
@@ -81,6 +81,10 @@ def format_overflow(data: str, max_width, trim = Trim.LEFT):
     remaining_info = fmt.format(len_bytes-remaining_bytes)
     if trim == Trim.LEFT:
         return  remaining_info+ data[-remaining:]
+    elif trim == Trim.CENTER:
+        # avoid unpair an hexa byte
+        half, rest = divmod(remaining_bytes, 2)
+        return data[:(half+rest)*2] + remaining_info + data[-half*2:]
     return  data[:remaining] + remaining_info
 
 
