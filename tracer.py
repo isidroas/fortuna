@@ -42,6 +42,33 @@ def trace_method(args_fmt='', ret_fmt='', log_start=True, log_end=True):
         return wrapper
     return decorator
 
+# TODO: make common with trace_method
+def trace_function(args_fmt='', ret_fmt='', log_start=True, log_end=True):
+    def decorator(meth: Callable):
+
+        def wrapper(*args, **kwargs):
+            global nesting
+            indent = INDENT_WIDTH* nesting
+            fmt="%s{callable.__name__}(%s)" % (indent, args_fmt)
+            meth2 = meth
+            if log_start:
+                meth2 = log_on_start(logging.DEBUG, Template(fmt))(meth2) # TODO: inficient; do outside wrapper
+            if log_end:
+                if log_start:
+                    # won't work if indent == ''
+                    fmt_list = list(fmt)
+                    fmt_list[len(indent)-2] = '⮑'
+                    fmt = ''.join(fmt_list)
+                meth2 = log_on_end(logging.DEBUG, Template(fmt + '-> ' + ret_fmt))(meth2)
+                meth2 = log_on_error(logging.DEBUG, Template(fmt + ' x {e!r}'), on_exceptions=Exception)(meth2)
+            nesting+=1
+            try:
+                return meth2(*args, **kwargs)
+            finally:
+                nesting-=1
+        return wrapper
+    return decorator
+
 def trace_property(fmt=None):
     def decorator(meth: Callable):
 

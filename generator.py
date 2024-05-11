@@ -4,7 +4,7 @@ from hashlib import sha256
 
 LOG = logging.getLogger(__name__)
 from formatter import Template
-from tracer import trace_method, trace_property
+from tracer import trace_method, trace_property, trace_function
 
 from cryptography.hazmat.primitives import ciphers
 
@@ -20,6 +20,7 @@ def encrypt(key: bytes, counter: int) -> bytes:
     return encryptor.update(counter.to_bytes(16, "little"))
 
 
+@trace_function('data=0x{data:25X}', 'res=0x{result:25X}', log_start=False)
 def sha_double_256(data: bytes) -> bytes:
     return sha256(sha256(data).digest()).digest()
 
