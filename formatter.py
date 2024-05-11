@@ -132,7 +132,8 @@ nesting = 0
 from typing import Callable
 from logdecorator import log_on_end, log_on_start, log_on_error
 import logging
-#TODO: change name to trace_method
+INDENT_WIDTH = '   '
+#TODO: change name to trace_method. It will remove self. Also lower case class name?
 #TODO: automatic format when None
 def log_trace(args_fmt='', ret_fmt='', log_start=True, log_end=True):
     """
@@ -144,14 +145,19 @@ def log_trace(args_fmt='', ret_fmt='', log_start=True, log_end=True):
 
         def wrapper(*args, **kwargs):
             global nesting
-            indent = ' ' * nesting
+            indent = INDENT_WIDTH* nesting
             fmt="%s{self.__class__.__name__}.{callable.__name__}(%s)" % (indent, args_fmt)
             meth2 = meth
             if log_start:
                 meth2 = log_on_start(logging.DEBUG, Template(fmt))(meth2) # TODO: inficient; do outside wrapper
             if log_end:
+                if log_start:
+                    # won't work if indent == ''
+                    fmt_list = list(fmt)
+                    fmt_list[len(indent)-2] = '⮑'
+                    fmt = ''.join(fmt_list)
                 meth2 = log_on_end(logging.DEBUG, Template(fmt + '-> ' + ret_fmt))(meth2)
-                meth2 = log_on_error(logging.DEBUG, Template(fmt + ' ⚡{e!r}'), on_exceptions=Exception)(meth2)
+                meth2 = log_on_error(logging.DEBUG, Template(fmt + ' x {e!r}'), on_exceptions=Exception)(meth2)
             nesting+=1
             try:
                 return meth2(*args, **kwargs)
@@ -166,7 +172,7 @@ def log_property(fmt=None):
 
         def wrapper(self, value):
             global nesting
-            indent = ' ' * nesting
+            indent = INDENT_WIDTH * nesting
             nesting+=1
             
             if fmt is not None:

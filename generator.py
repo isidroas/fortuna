@@ -28,6 +28,7 @@ class Generator(object):
         self.key = b"\x00" * 32
         self.counter = 0
 
+    @log_trace('seed=0x{seed:50X}')
     def reseed(self, seed: bytes):
         self.key = sha_double_256(self.key + seed)
         self.counter += 1
