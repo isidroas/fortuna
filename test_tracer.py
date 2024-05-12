@@ -53,16 +53,21 @@ class trace_method:
     def __call__(self, method: Callable):
 
         def wrapper(*args, **kwargs):
-            if start := self.format_start(method, args, kwargs):
-                print(start)
+            if not self.merge: 
+                print(self.format_start(method, args, kwargs))
             try:
                 ret = method(*args, **kwargs)
             except Exception as exc:
-                print(self.format_exception(method,exc))
+                if self.merge:
+                    print(self.format_merged_exception(method,args, kwargs, exc))
+                else:
+                    print(self.format_exception(method,exc))
                 raise
 
-            if end := self.format_end(method,ret):
-                print(end)
+            if self.merge:
+                print(self.format_merged(method,args, kwargs, ret))
+            else:
+                print(self.format_end(method,ret))
             return ret
 
         return wrapper
@@ -170,8 +175,6 @@ A.foo('one', ' two')
         == capsys.readouterr().out
     )
 
-def test_stdout_exception(method, capsys):
-    wrap = trace_method()(method)
     with pytest.raises(TypeError):
         wrap('one', 2)
     assert (
@@ -181,3 +184,13 @@ TypeError('can only concatenate str (not "int") to str') X- A.foo(...)
 """
         == capsys.readouterr().out
     )
+
+def test_stdout_merged(method, capsys):
+    wrap = trace_method(merge=True)(method)
+    wrap("one", ' two')
+    assert "A.foo('one', ' two') -> 'one two'\n" == capsys.readouterr().out
+    
+    with pytest.raises(TypeError):
+        wrap('one', 2)
+    assert "A.foo('one', 2) -X TypeError('can only concatenate str (not \"int\") to str')\n" == capsys.readouterr().out
+    
