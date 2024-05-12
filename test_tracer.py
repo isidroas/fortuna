@@ -55,8 +55,13 @@ class trace_method:
         def wrapper(*args, **kwargs):
             if start := self.format_start(method, args, kwargs):
                 print(start)
-            ret = self.method(*args, **kwargs)
-            if end := self.format_end(ret):
+            try:
+                ret = method(*args, **kwargs)
+            except Exception as exc:
+                print(self.format_exception(method,exc))
+                raise
+
+            if end := self.format_end(method,ret):
                 print(end)
             return ret
 
@@ -95,7 +100,7 @@ class trace_method:
 
 class A:
     def foo(self, a, b, c=3):
-        return "hello"
+        return a + b
 
 
 @pytest.fixture
@@ -153,15 +158,26 @@ def test_trace_function():
     assert "getLogger(5, 3)" == decorator.format_start(fn, args=(5, 3))
 
 
-@pytest.mark.skip
 def test_stdout(method, capsys):
     # TODO: pytest capture stdout
     wrap = trace_method()(method)
-    wrap("one", 2)
+    wrap("one", ' two')
     assert (
         """\
-A.foo("one", 2)
-"hello" <- A.foo(...)
+A.foo('one', ' two')
+'one two' <- A.foo(...)
+"""
+        == capsys.readouterr().out
+    )
+
+def test_stdout_exception(method, capsys):
+    wrap = trace_method()(method)
+    with pytest.raises(TypeError):
+        wrap('one', 2)
+    assert (
+        """\
+A.foo('one', 2)
+TypeError('can only concatenate str (not "int") to str') X- A.foo(...)
 """
         == capsys.readouterr().out
     )
