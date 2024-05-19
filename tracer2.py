@@ -123,18 +123,14 @@ class FunctionTracer:
         return wrapper
 
     def format_start(self, method, args, kwargs={}, indent=""):
-        return "%s%s(%s)" % (
+        return "{}{name}({args}) ...".format(
             indent,
-            get_name(method),
-            self.format_args(args, kwargs, method),
+            name=get_name(method),
+            args=self.format_args(args, kwargs, method),
         )
 
     def format_end(self, method, ret, indent=""):
-        res = "<- %s(...)" % (get_name(method))
-        if ret is not None:
-            res = self.format_ret(ret) + ' ' + res
-        res = indent + res
-        return res
+        return '%s-> %s' % (indent, self.format_ret(ret))
 
     def format_merged(self, method, args=(), kwargs={}, ret=None, indent=""):
         return "%s%s(%s) -> %s" % (
@@ -145,7 +141,8 @@ class FunctionTracer:
         )
 
     def format_exception(self, method, exc, indent=""):
-        return "%s%r %s %s(...)" % (indent, exc, EXC[::-1], get_name(method))
+        return "{}-X {exc!r}".format(indent, exc=exc)
+    
 
     def format_merged_exception(self, method, args, kwargs, exc, indent=""):
         return "%s%s(%s) %s %r" % (
@@ -158,7 +155,6 @@ class FunctionTracer:
 
     def format_args(self, args, kwargs, func):
         signature = inspect.signature(func)
-        # TODO: create format_method
         if self.args_fmt is not None:
             # use bind_partial instead to delay error?
             bind = signature.bind_partial(*args, **kwargs)

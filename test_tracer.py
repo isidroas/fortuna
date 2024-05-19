@@ -73,9 +73,9 @@ def test_trace_method():
 
     # "A.foo('one', 2) -> ..."
     # "A.foo('one', 2) ..."
-    assert "A.foo('one', 2)" == decorator.format_start(method, args=("one", 2))
+    assert "A.foo('one', 2) ..." == decorator.format_start(method, args=("one", 2))
 
-    assert "A.foo('one', b=2)" == decorator.format_start(
+    assert "A.foo('one', b=2) ..." == decorator.format_start(
         method, args=("one",), kwargs={"b": 2}
     )
 
@@ -83,17 +83,20 @@ def test_trace_method():
     # <- 'hello'
     # 'hello' <-
     # 'hello' = A.foo(...)
-    assert "'hello' <- A.foo(...)" == decorator.format_end(method, ret="hello")
-    assert "5 <- A.foo(...)" == decorator.format_end(method, ret=5)
-    assert "<- A.foo(...)" == decorator.format_end(method, ret=None)
+    # 'hello' <- A.foo(...)
+    assert "-> 'hello'" == decorator.format_end(method, ret="hello")
+    assert "-> 5" == decorator.format_end(method, ret=5)
+    assert "-> None" == decorator.format_end(method, ret=None)
 
     assert "A.foo('one', 2) -> 5" == decorator.format_merged(
         method, args=("one", 2), ret=5
     )
+
+    # or "A.foo('one', 2)"
     assert "A.foo('one', 2) -> None" == decorator.format_merged(
         method, args=("one", 2), ret=None
     )
-    # "A.foo('one', 2)"
+
 
     assert (
         "A.foo('one', 2) -X AssertionError('invalid')"
@@ -102,7 +105,7 @@ def test_trace_method():
         )
     )
 
-    assert "AssertionError('invalid') X- A.foo(...)" == decorator.format_exception(
+    assert "-X AssertionError('invalid')" == decorator.format_exception(
         method, exc=AssertionError("invalid")
     )
 
