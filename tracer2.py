@@ -130,16 +130,16 @@ class FunctionTracer:
     def format_end(self, method, ret, indent=""):
         res = "<- %s(...)" % (get_name(method))
         if ret is not None:
-            res = "%r " % ret + res
+            res = self.format_ret(ret) + ' ' + res
         res = indent + res
         return res
 
     def format_merged(self, method, args=(), kwargs={}, ret=None, indent=""):
-        return "%s%s(%s) -> %r" % (
+        return "%s%s(%s) -> %s" % (
             indent,
             get_name(method),
             self.format_args(args, kwargs, method),
-            ret,
+            self.format_ret(ret),
         )
 
     def format_exception(self, method, exc, indent=""):
@@ -166,6 +166,10 @@ class FunctionTracer:
         if is_bounded:
             args = args[1:]
         return format_args(args, kwargs)
+    def format_ret(self, ret):
+        if self.ret_fmt is None:
+            return repr(ret)
+        return self.ret_fmt.format(ret)
 
 
 class MethodTracer(FunctionTracer):

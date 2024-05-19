@@ -106,6 +106,17 @@ def test_trace_method():
         method, exc=AssertionError("invalid")
     )
 
+def test_arg_formats():
+    def func(a, b, c=3): ...
+
+    method.__qualname__ = "A.foo"
+    t = FunctionTracer(args_fmt='b={b}')
+    assert "b=7" == t.format_args((5, ), {'b': 7}, func)
+
+def test_ret_format():
+    t = FunctionTracer(ret_fmt='{0:.3}')
+    assert '0.333' == t.format_ret(1/3)
+
 
 def test_trace_function():
     # change to trace call?
