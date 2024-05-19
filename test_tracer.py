@@ -147,47 +147,39 @@ def test_trace_property2():
     assert a.my_attr2 == 4
 
 
-def test_stdout(capsys, reset_indent):
+def test_stdout(caplog, reset_indent):
 
     A.foo2 = MethodTracer()(A.foo)
     a = A()
     method = a.foo2
 
-    method("one", " two")
-    assert (
-        """\
-A.foo('one', ' two')
-'one two' <- A.foo(...)
-"""
-        == capsys.readouterr().out
-    )
+    with caplog.at_level(logging.DEBUG, logger='A.foo'):
+        method("one", " two")
+    assert "A.foo('one', ' two')" == caplog.records.pop(0).message
+    assert "'one two' <- A.foo(...)" == caplog.records.pop(0).message
 
-    with pytest.raises(TypeError):
+    with (caplog.at_level(logging.DEBUG, logger='A.foo'), pytest.raises(TypeError)):
         method("one", 2)
-    assert (
-        """\
-A.foo('one', 2)
-TypeError('can only concatenate str (not "int") to str') X- A.foo(...)
-"""
-        == capsys.readouterr().out
-    )
+
+    assert "A.foo('one', 2)" == caplog.records.pop(0).message
+    assert "TypeError('can only concatenate str (not \"int\") to str') X- A.foo(...)" == caplog.records.pop(0).message
 
 
-def test_stdout_merged(capsys, reset_indent):
+def test_stdout_merged(caplog, reset_indent):
 
     A.foo2 = MethodTracer(merge=True)(A.foo)
     a = A()
     method = a.foo2
-    # wrap("one", " two")
-    method("one", " two")
-    assert "A.foo('one', ' two') -> 'one two'\n" == capsys.readouterr().out
 
-    with pytest.raises(TypeError):
+    with caplog.at_level(logging.DEBUG, logger='A.foo'):
+        method("one", " two")
+
+    assert "A.foo('one', ' two') -> 'one two'" == caplog.records.pop(0).message
+
+    with (caplog.at_level(logging.DEBUG, logger='A.foo'), pytest.raises(TypeError)):
         method("one", 2)
-    assert (
-        "A.foo('one', 2) -X TypeError('can only concatenate str (not \"int\") to str')\n"
-        == capsys.readouterr().out
-    )
+
+    assert ("A.foo('one', 2) -X TypeError('can only concatenate str (not \"int\") to str')" == caplog.records.pop(0).message)
 
 
 def test_stdout_property(capsys, reset_indent):
@@ -206,16 +198,19 @@ def test_stdout_property(capsys, reset_indent):
     )
 
 
-def test_stdout_indent(capsys, reset_indent):
+def test_stdout_indent(caplog, reset_indent):
     # TODO: test property
     a = A()
-    a.level1(2, 3)
+
+    with caplog.at_level(logging.DEBUG, logger='A'):
+        a.level1(2, 3)
+
     assert (
         """\
 A.level1(2, 3)
     A.level3(5) -> 10
     A.level2_interesting(10) -> 9
-9 <- A.level1(...)
+9 <- A.level1(...)\
 """
-        == capsys.readouterr().out
+        == '\n'.join(record.message for record in  caplog.records) 
     )

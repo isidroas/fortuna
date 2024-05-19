@@ -1,4 +1,5 @@
 import itertools
+import logging
 
 # from tracer import trace_method
 from typing import Callable
@@ -93,29 +94,30 @@ class FunctionTracer:
 
     def __call__(self, method: Callable):
 
+        logger = logging.getLogger(method.__qualname__ + '.tracer')
         @functools.wraps(method)
         def wrapper(*args, **kwargs):
             with track_indent() as indent:
 
                 if not self.merge:
-                    print(self.format_start(method, args, kwargs, indent))
+                    logger.debug(self.format_start(method, args, kwargs, indent))
                 try:
                     ret = method(*args, **kwargs)
                 except Exception as exc:
                     if self.merge:
-                        print(
+                        logger.debug(
                             self.format_merged_exception(
                                 method, args, kwargs, exc, indent
                             )
                         )
                     else:
-                        print(self.format_exception(method, exc, indent))
+                        logger.debug(self.format_exception(method, exc, indent))
                     raise
 
                 if self.merge:
-                    print(self.format_merged(method, args, kwargs, ret, indent))
+                    logger.debug(self.format_merged(method, args, kwargs, ret, indent))
                 else:
-                    print(self.format_end(method, ret, indent))
+                    logger.debug(self.format_end(method, ret, indent))
                 return ret
 
         return wrapper
@@ -201,10 +203,10 @@ class TracedSetBase:
     @abstractmethod
     def setter(self, obj, value): ...
 
-    def format_set(self, value, indent):
+    def format_set(self, value, indent=''):
         return "%s%s.%s=%s" % (indent, self.owner.__name__, self.name, self.format_value(value))
 
-    def format_exception(self, value, exc, indent):
+    def format_exception(self, value, exc, indent=''):
         return "%s%s.%s=%r %s %r" % (indent, self.owner.__name__, self.name, value, EXC, exc)
 
     def format_value(self, value):
