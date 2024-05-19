@@ -9,7 +9,7 @@ from typing import Callable
 from formatter import Template
 from logdecorator import log_on_end, log_on_start, log_on_error
 import logging
-INDENT_WIDTH = '   '
+INDENT_WIDTH = '    '
 #TODO: automatic format when None
 def trace_method(args_fmt='', ret_fmt='', log_start=True, log_end=True):
     """
@@ -27,11 +27,12 @@ def trace_method(args_fmt='', ret_fmt='', log_start=True, log_end=True):
             if log_start:
                 meth2 = log_on_start(logging.DEBUG, Template(fmt))(meth2) # TODO: inficient; do outside wrapper
             if log_end:
-                if log_start and indent!='':
-                    fmt_list = list(fmt)
-                    fmt_list[len(indent)-2] = '⮑'
-                    fmt = ''.join(fmt_list)
-                meth2 = log_on_end(logging.DEBUG, Template(fmt + '-> ' + ret_fmt))(meth2)
+                # if log_start and indent!='':
+                #     fmt_list = list(fmt)
+                #     fmt_list[len(indent)-2] = '⮑'
+                #     fmt = ''.join(fmt_list)
+                fmt="%s{self.__class__.__name__}.{callable.__name__}(...)" % (indent)
+                meth2 = log_on_end(logging.DEBUG, Template(indent+ret_fmt+ '<- '+fmt.lstrip() ))(meth2)
                 meth2 = log_on_error(logging.DEBUG, Template(fmt + ' x {e!r}'), on_exceptions=Exception)(meth2)
             nesting+=1
             try:
