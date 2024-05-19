@@ -192,27 +192,32 @@ class TracedSetBase:
         self.owner = owner
 
     def __set__(self, obj, value):
+        logger = logging.getLogger(self.qualname + '.tracer')
         with track_indent() as indent: # is uncommon property with child calls?
             try:
                 self.setter(obj, value)
             except Exception as exc:
-                print(self.format_exception(value, exc, indent))
+                logger.debug(self.format_exception(value, exc, indent))
                 raise
-            print(self.format_set(value, indent))
+            logger.debug(self.format_set(value, indent))
 
     @abstractmethod
     def setter(self, obj, value): ...
 
     def format_set(self, value, indent=''):
-        return "%s%s.%s=%s" % (indent, self.owner.__name__, self.name, self.format_value(value))
+        return "%s%s=%s" % (indent, self.qualname, self.format_value(value))
 
     def format_exception(self, value, exc, indent=''):
-        return "%s%s.%s=%r %s %r" % (indent, self.owner.__name__, self.name, value, EXC, exc)
+        return "%s%s=%r %s %r" % (indent, self.qualname, value, EXC, exc)
 
     def format_value(self, value):
         if self.value_fmt is None:
             return repr(value)
         return self.value_fmt.format(value)
+
+    @property
+    def qualname(self):
+        return "%s.%s" % (self.owner.__name__, self.name)
 
 
 class TracedSet(TracedSetBase):

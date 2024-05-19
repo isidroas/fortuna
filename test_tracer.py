@@ -182,19 +182,22 @@ def test_stdout_merged(caplog, reset_indent):
     assert ("A.foo('one', 2) -X TypeError('can only concatenate str (not \"int\") to str')" == caplog.records.pop(0).message)
 
 
-def test_stdout_property(capsys, reset_indent):
+def test_stdout_property(caplog, reset_indent):
     a = A()
-    a.my_attr = 3
-    assert "A.my_attr=3\n" == capsys.readouterr().out
+
+    with caplog.at_level(logging.DEBUG, logger='A.my_attr'):
+        a.my_attr = 3
+    assert "A.my_attr=3" == caplog.records.pop(0).message
 
     a = A()
-    a.my_attr2 = 3
-    assert "A.my_attr2=3\n" == capsys.readouterr().out
-    with pytest.raises(ValueError):
+    with caplog.at_level(logging.DEBUG, logger='A.my_attr2'):
+        a.my_attr2 = 3
+    assert "A.my_attr2=3" == caplog.records.pop(0).message
+    with (caplog.at_level(logging.DEBUG, logger='A.my_attr2'), pytest.raises(ValueError)):
         a.my_attr2 = 11
     assert (
-        "A.my_attr2=11 -X ValueError('should be less than 10')\n"
-        == capsys.readouterr().out
+        "A.my_attr2=11 -X ValueError('should be less than 10')"
+        == caplog.records.pop(0).message
     )
 
 
