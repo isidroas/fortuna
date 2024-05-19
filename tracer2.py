@@ -66,6 +66,7 @@ def track_indent():
     increment_indent()
     try:
         yield get_indent()
+        # TODO: yield nesting-1? easier for properties?
     finally:
         decrement_indent()
 
@@ -101,24 +102,20 @@ class MethodTracer:
         return wrapper
 
     def format_start(self, method, args, kwargs={}, indent=''):
-        return "%s(%s)" % (get_name(method), format_args(args, kwargs))
+        return "%s%s(%s)" % (indent, get_name(method), format_args(args, kwargs))
 
     def format_end(self, method, ret, indent=''):
-        res = "<- %s(...)" % get_name(method)
+        res = "<- %s(...)" % (get_name(method))
         if ret is not None:
             res = "%r " % ret + res
+        res = indent + res
         return res
 
     def format_merged(self, method, args=(), kwargs={}, ret=None, indent=''):
-        return "%s(%s) -> %r" % (get_name(method), format_args(args, kwargs), ret)
-
-        res = "<- %s(...)" % get_name(method)
-        if ret is not None:
-            res = "%r " % ret + res
-        return res
+        return "%s%s(%s) -> %r" % (indent, get_name(method), format_args(args, kwargs), ret)
 
     def format_exception(self, method, exc, indent=''):
-        return "%r %s %s(...)" % (exc, EXC[::-1], get_name(method))
+        return "%s%r %s %s(...)" % (indent, exc, EXC[::-1], get_name(method))
 
     def format_merged_exception(self, method, args, kwargs, exc, indent=''):
         return "%s%s(%s) %s %r" % (

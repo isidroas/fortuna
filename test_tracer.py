@@ -70,7 +70,10 @@ def test_trace_method(method):
         method, args=("one",), kwargs={"b": 2}
     )
 
-    # "'hello' = A.foo(...)"
+    # -> 'hello'   # menos información, pero era redundante. Esta opción tiene todo el sentido como se empezó ...; Además con el highliter creo que queda espectacular y más sencillo porque todas apuntan a un mismo sentido
+    # <- 'hello'
+    # 'hello' <-
+    # 'hello' = A.foo(...)
     assert "'hello' <- A.foo(...)" == decorator.format_end(method, ret="hello")
     assert "5 <- A.foo(...)" == decorator.format_end(method, ret=5)
     assert "<- A.foo(...)" == decorator.format_end(method, ret=None)
@@ -167,11 +170,12 @@ def test_stdout_property(capsys, reset_indent):
     assert "A.my_attr2=11 -X ValueError('should be less than 10')\n" == capsys.readouterr().out
 
 def test_stdout_indent(capsys, reset_indent):
+    # TODO: test property
     a = A()
     a.level1(2,3)
     assert """
 A.level1(2, 3) -> ...
-   A.level3(6) -> 12
-   A.level2_interesting(12) -> 11
-11 <- A.level1(...)
-    """ == capsys.readouterr().out
+    A.level3(5) -> 10
+    A.level2_interesting(12) -> 9
+9 <- A.level1(...)
+""" == capsys.readouterr().out
