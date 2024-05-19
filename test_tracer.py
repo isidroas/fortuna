@@ -1,6 +1,6 @@
 import pytest
 from tracer2 import *
-    
+
 
 # TODO: put here static and class methods
 class A:
@@ -13,11 +13,10 @@ class A:
     @trace_property
     @my_attr2.setter
     def my_attr2(self, value):
-        if value>=10:
-            raise ValueError('should be less than 10')
+        if value >= 10:
+            raise ValueError("should be less than 10")
         self._my_atrr2 = value
 
-    
     def foo(self, a, b, c=3):
         return a + b
 
@@ -27,7 +26,7 @@ class A:
 
     @trace_method
     def level1(self, a, b):
-        res = self.level2_not_interesting(a+b)
+        res = self.level2_not_interesting(a + b)
         return self.level2_interesting(res)
 
     # it allows you to ignore non-insteresting functions
@@ -36,24 +35,26 @@ class A:
 
     @trace_method(merge=True)
     def level3(self, c):
-        return c*2
+        return c * 2
 
     @trace_method(merge=True)
     def level2_interesting(self, c):
-        return c -1
-
+        return c - 1
 
 
 @pytest.fixture
 def reset_indent():
     import tracer2
-    tracer2.nesting=-1
+
+    tracer2.nesting = -1
+
 
 @pytest.fixture
 def method():
 
     a = A()
     return a.foo
+
 
 @pytest.fixture
 def prop():
@@ -64,8 +65,9 @@ def prop():
 
 def test_trace_method():
 
-    def method():  ...
-    method.__qualname__ = 'A.foo'
+    def method(): ...
+
+    method.__qualname__ = "A.foo"
     decorator = FunctionTracer()
     # wrap = decorator(method)
 
@@ -115,19 +117,24 @@ def test_trace_function():
     # 'logging:getLogger(5, 3)'
     assert "getLogger(5, 3)" == decorator.format_start(fn, args=(5, 3))
 
+
 def test_trace_property(method):
     decorator = TracedSet()
     decorator.owner = A
-    decorator.name = 'foo'
+    decorator.name = "foo"
     assert "A.foo=3" == decorator.format_set(3)
-    assert "A.foo=3 -X ValueError('Minimum is ten')" == decorator.format_exception(3, ValueError('Minimum is ten'))
+    assert "A.foo=3 -X ValueError('Minimum is ten')" == decorator.format_exception(
+        3, ValueError("Minimum is ten")
+    )
+
 
 def test_trace_property2():
     a = A()
-    a.my_attr=3
-    assert a.my_attr==3
-    a.my_attr2=4
-    assert a.my_attr2==4
+    a.my_attr = 3
+    assert a.my_attr == 3
+    a.my_attr2 = 4
+    assert a.my_attr2 == 4
+
 
 def test_stdout(capsys, reset_indent):
 
@@ -171,6 +178,7 @@ def test_stdout_merged(capsys, reset_indent):
         == capsys.readouterr().out
     )
 
+
 def test_stdout_property(capsys, reset_indent):
     a = A()
     a.my_attr = 3
@@ -180,16 +188,23 @@ def test_stdout_property(capsys, reset_indent):
     a.my_attr2 = 3
     assert "A.my_attr2=3\n" == capsys.readouterr().out
     with pytest.raises(ValueError):
-        a.my_attr2=11
-    assert "A.my_attr2=11 -X ValueError('should be less than 10')\n" == capsys.readouterr().out
+        a.my_attr2 = 11
+    assert (
+        "A.my_attr2=11 -X ValueError('should be less than 10')\n"
+        == capsys.readouterr().out
+    )
+
 
 def test_stdout_indent(capsys, reset_indent):
     # TODO: test property
     a = A()
-    a.level1(2,3)
-    assert """\
+    a.level1(2, 3)
+    assert (
+        """\
 A.level1(2, 3)
     A.level3(5) -> 10
     A.level2_interesting(10) -> 9
 9 <- A.level1(...)
-""" == capsys.readouterr().out
+"""
+        == capsys.readouterr().out
+    )
