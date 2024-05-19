@@ -7,7 +7,10 @@ from time import time
 import generator
 from generator import Generator, sha_double_256
 from formatter import Template
-from tracer import  trace_method, trace_property
+# from tracer import  trace_method, trace_property
+
+from tracer2 import trace_method, trace_property, trace_function, TracedSet
+from formatter import Template as T
 
 MINPOOLSIZE = 64
 
@@ -20,8 +23,11 @@ class FortunaSeedFileError(Exception): ...
 class FortunaSeedFileEmpty(FortunaSeedFileError): ...
 
 
-class Fortuna(object):
-    @trace_method('seed_file="{seed_file}"')
+class Fortuna:
+
+    reseed_cnt = TracedSet()
+
+    @trace_function(args_fmt='seed_file="{seed_file}"')
     def __init__(self, seed_file: IOBase | Path | None = None):
         self.pools = [bytearray() for i in range(32)]
         self.reseed_cnt = 0
@@ -72,7 +78,7 @@ class Fortuna(object):
 
         return self.generator.pseudo_randomdata(nbytes)
 
-    @trace_method("source={source!r}, pool={pool}, data=0x{data:X}", log_end=False)
+    @trace_function(args_fmt="source={source!r}, pool={pool}, data=0x{data:X}", merge=True)
     def add_random_event(self, source: int, pool: int, data: bytes):
         assert 1 <= len(data) <= 32
         assert 0 <= source <= 255
@@ -101,7 +107,7 @@ class Fortuna(object):
         self.generator.reseed(s)
         self._overwrite_seed_file(self.random_data(64))
 
-    @trace_method("", "0x{result:50X}", log_start=False)
+    @trace_method(ret_fmt=T("0x{:50X}"), merge=True)
     def _read_seed_file(self):
         self.seed_file.seek(0)
         s = self.seed_file.read()
@@ -112,19 +118,11 @@ class Fortuna(object):
             raise FortunaSeedFileError(msg)
         return s
 
-    @trace_method('"0x{data:50X}"', log_end=False)
+    @trace_function(args_fmt=T('"0x{data:50X}"'), merge=True)
     def _overwrite_seed_file(self, data):
         self.seed_file.seek(0)
         self.seed_file.write(data)
 
-    @property
-    def reseed_cnt(self):
-        return self._reseed_cnt
-
-    @reseed_cnt.setter
-    @trace_property()
-    def reseed_cnt(self, value: int):
-        self._reseed_cnt = value
 
 import contextlib
 
