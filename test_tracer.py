@@ -17,7 +17,12 @@ class A:
             raise ValueError('should be less than 10')
         self._my_atrr2 = value
 
+    
     def foo(self, a, b, c=3):
+        return a + b
+
+    @trace_method(merge=True)
+    def f_merged(self, a, b, c=3):
         return a + b
 
     @trace_method
@@ -29,11 +34,11 @@ class A:
     def level2_not_interesting(self, c):
         return self.level3(c)
 
-    @trace_method
+    @trace_method(merge=True)
     def level3(self, c):
         return c*2
 
-    @trace_method
+    @trace_method(merge=True)
     def level2_interesting(self, c):
         return c -1
 
@@ -57,9 +62,11 @@ def prop():
     return a.my_prop
 
 
-def test_trace_method(method):
+def test_trace_method():
 
-    decorator = trace_method()
+    def method():  ...
+    method.__qualname__ = 'A.foo'
+    decorator = FunctionTracer()
     # wrap = decorator(method)
 
     # "A.foo('one', 2) -> ..."
@@ -100,7 +107,7 @@ def test_trace_method(method):
 
 def test_trace_function():
     # change to trace call?
-    decorator = trace_method()
+    decorator = FunctionTracer()
     import logging
 
     fn = logging.getLogger
@@ -122,10 +129,13 @@ def test_trace_property2():
     a.my_attr2=4
     assert a.my_attr2==4
 
-def test_stdout(method, capsys, reset_indent):
-    # TODO: pytest capture stdout
-    wrap = trace_method()(method)
-    wrap("one", " two")
+def test_stdout(capsys, reset_indent):
+
+    A.foo2 = MethodTracer()(A.foo)
+    a = A()
+    method = a.foo2
+
+    method("one", " two")
     assert (
         """\
 A.foo('one', ' two')
@@ -135,7 +145,7 @@ A.foo('one', ' two')
     )
 
     with pytest.raises(TypeError):
-        wrap("one", 2)
+        method("one", 2)
     assert (
         """\
 A.foo('one', 2)
@@ -145,13 +155,17 @@ TypeError('can only concatenate str (not "int") to str') X- A.foo(...)
     )
 
 
-def test_stdout_merged(method, capsys, reset_indent):
-    wrap = MethodTracer(merge=True)(method)
-    wrap("one", " two")
+def test_stdout_merged(capsys, reset_indent):
+
+    A.foo2 = MethodTracer(merge=True)(A.foo)
+    a = A()
+    method = a.foo2
+    # wrap("one", " two")
+    method("one", " two")
     assert "A.foo('one', ' two') -> 'one two'\n" == capsys.readouterr().out
 
     with pytest.raises(TypeError):
-        wrap("one", 2)
+        method("one", 2)
     assert (
         "A.foo('one', 2) -X TypeError('can only concatenate str (not \"int\") to str')\n"
         == capsys.readouterr().out

@@ -37,12 +37,17 @@ def get_name(fn):
 
 EXC = "-X"
 
-def trace_method(method=None,*, arg_fmt=None, ret_fmt=None, merge=False):
+def trace_method(method=None,*, ret_fmt=None, merge=False):
     if method is None:
-        return MethodTracer(arg_fmt=None, ret_fmt=None, merge=False)
+        return MethodTracer(args_fmt=None, ret_fmt=None, merge=False)
     else:
         return MethodTracer()(method)
 
+def trace_function(function=None,*, args_fmt=None, ret_fmt=None, merge=False):
+    if function is None:
+        return FunctionTracer(args_fmt=None, ret_fmt=None, merge=False)
+    else:
+        return FunctionTracer()(function)
 
 # global var. This is not thread safe
 nesting = -1
@@ -70,15 +75,15 @@ def track_indent():
     finally:
         decrement_indent()
 
-class MethodTracer:
-    def __init__(self, arg_fmt=None, ret_fmt=None, merge=False):
+class FunctionTracer:
+    def __init__(self, args_fmt=None, ret_fmt=None, merge=False):
         self.merge = merge
-        self.arg_fmt = arg_fmt
+        self.args_fmt = args_fmt
         self.ret_fmt = ret_fmt
 
     def __call__(self, method: Callable):
 
-        # TODO: use functools.wrap
+        @functools.wraps(method)
         def wrapper(*args, **kwargs):
             with track_indent() as indent:
 
@@ -102,7 +107,7 @@ class MethodTracer:
         return wrapper
 
     def format_start(self, method, args, kwargs={}, indent=''):
-        return "%s%s(%s)" % (indent, get_name(method), format_args(args, kwargs))
+        return "%s%s(%s)" % (indent, get_name(method), self.format_args(args, kwargs, method))
 
     def format_end(self, method, ret, indent=''):
         res = "<- %s(...)" % (get_name(method))
@@ -112,7 +117,7 @@ class MethodTracer:
         return res
 
     def format_merged(self, method, args=(), kwargs={}, ret=None, indent=''):
-        return "%s%s(%s) -> %r" % (indent, get_name(method), format_args(args, kwargs), ret)
+        return "%s%s(%s) -> %r" % (indent, get_name(method), self.format_args(args, kwargs, method), ret)
 
     def format_exception(self, method, exc, indent=''):
         return "%s%r %s %s(...)" % (indent, exc, EXC[::-1], get_name(method))
@@ -121,10 +126,27 @@ class MethodTracer:
         return "%s%s(%s) %s %r" % (
             indent,
             get_name(method),
-            format_args(args, kwargs),
+            self.format_args(args, kwargs, method),
             EXC,
             exc,
         )
+
+    def format_args(self, args, kwargs, func):
+        signature = inspect.signature(func)
+        # TODO: create format_method
+        if self.args_fmt is not None:
+            # use bind_partial instead to delay error?
+            bind = signature.bind_partial(*args, **kwargs)
+            bind.apply_defaults()
+            return self.args_fmt.format(**bind.arguments)
+        is_bounded = hasattr(func, '__self__')
+        if is_bounded:
+            args=args[1:]
+        return format_args(args, kwargs)
+
+class MethodTracer(FunctionTracer):
+    def format_args(self, args, kwargs, func):
+        return super().format_args(args[1:], kwargs, func)
 
 from abc import abstractmethod
 class TracedSetBase:
@@ -196,5 +218,3 @@ def trace_property(prop=None, *, value_fmt=None):
         return lambda prop: TracedSetWrapped(inner_descriptor=prop, value_fmt=value_fmt)
     else:
         return TracedSetWrapped(inner_descriptor=prop)
-
-
