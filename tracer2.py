@@ -48,7 +48,7 @@ def trace_method(method=None, *, ret_fmt=None, merge=False):
 
 def trace_function(function=None, *, args_fmt=None, ret_fmt=None, merge=False):
     if function is None:
-        return FunctionTracer(args_fmt=None, ret_fmt=None, merge=False)
+        return FunctionTracer(args_fmt=args_fmt, ret_fmt=ret_fmt, merge=merge)
     else:
         return FunctionTracer()(function)
 
@@ -190,21 +190,27 @@ class TracedSetBase:
         self.owner = owner
 
     def __set__(self, obj, value):
-        try:
-            self.setter(obj, value)
-        except Exception as exc:
-            print(self.format_exception(value, exc))
-            raise
-        print(self.format_set(value))
+        with track_indent() as indent: # is uncommon property with child calls?
+            try:
+                self.setter(obj, value)
+            except Exception as exc:
+                print(self.format_exception(value, exc, indent))
+                raise
+            print(self.format_set(value, indent))
 
     @abstractmethod
     def setter(self, obj, value): ...
 
-    def format_set(self, value):
-        return "%s.%s=%r" % (self.owner.__name__, self.name, value)
+    def format_set(self, value, indent):
+        return "%s%s.%s=%s" % (indent, self.owner.__name__, self.name, self.format_value(value))
 
-    def format_exception(self, value, exc):
-        return "%s.%s=%r %s %r" % (self.owner.__name__, self.name, value, EXC, exc)
+    def format_exception(self, value, exc, indent):
+        return "%s%s.%s=%r %s %r" % (indent, self.owner.__name__, self.name, value, EXC, exc)
+
+    def format_value(self, value):
+        if self.value_fmt is None:
+            return repr(value)
+        return self.value_fmt.format(value)
 
 
 class TracedSet(TracedSetBase):
