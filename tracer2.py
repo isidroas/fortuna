@@ -39,7 +39,7 @@ EXC = "-X"
 
 def trace_method(method=None,*, ret_fmt=None, merge=False):
     if method is None:
-        return MethodTracer(args_fmt=None, ret_fmt=None, merge=False)
+        return MethodTracer(args_fmt=None, ret_fmt=ret_fmt, merge=merge)
     else:
         return MethodTracer()(method)
 

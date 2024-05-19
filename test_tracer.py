@@ -187,9 +187,9 @@ def test_stdout_indent(capsys, reset_indent):
     # TODO: test property
     a = A()
     a.level1(2,3)
-    assert """
-A.level1(2, 3) -> ...
+    assert """\
+A.level1(2, 3)
     A.level3(5) -> 10
-    A.level2_interesting(12) -> 9
+    A.level2_interesting(10) -> 9
 9 <- A.level1(...)
 """ == capsys.readouterr().out
