@@ -1,9 +1,6 @@
 
 # global var. This is not thread safe
 nesting = 0
-# how to include only buisness logic? rejected ideas
-#  - preselect functions from stacktrace
-#  - in the log.debug. No funciona si se pone al final y no al principio
 
 from typing import Callable
 from formatter import Template

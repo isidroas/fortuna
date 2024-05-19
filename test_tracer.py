@@ -39,6 +39,10 @@ class A:
 
 
 
+@pytest.fixture
+def reset_indent():
+    import tracer2
+    tracer2.nesting=-1
 
 @pytest.fixture
 def method():
@@ -115,7 +119,7 @@ def test_trace_property2():
     a.my_attr2=4
     assert a.my_attr2==4
 
-def test_stdout(method, capsys):
+def test_stdout(method, capsys, reset_indent):
     # TODO: pytest capture stdout
     wrap = trace_method()(method)
     wrap("one", " two")
@@ -138,7 +142,7 @@ TypeError('can only concatenate str (not "int") to str') X- A.foo(...)
     )
 
 
-def test_stdout_merged(method, capsys):
+def test_stdout_merged(method, capsys, reset_indent):
     wrap = MethodTracer(merge=True)(method)
     wrap("one", " two")
     assert "A.foo('one', ' two') -> 'one two'\n" == capsys.readouterr().out
@@ -150,7 +154,7 @@ def test_stdout_merged(method, capsys):
         == capsys.readouterr().out
     )
 
-def test_stdout_property(capsys):
+def test_stdout_property(capsys, reset_indent):
     a = A()
     a.my_attr = 3
     assert "A.my_attr=3\n" == capsys.readouterr().out
@@ -162,7 +166,7 @@ def test_stdout_property(capsys):
         a.my_attr2=11
     assert "A.my_attr2=11 -X ValueError('should be less than 10')\n" == capsys.readouterr().out
 
-def test_stdout_indent(capsys):
+def test_stdout_indent(capsys, reset_indent):
     a = A()
     a.level1(2,3)
     assert """

@@ -43,6 +43,32 @@ def trace_method(method=None,*, arg_fmt=None, ret_fmt=None, merge=False):
     else:
         return MethodTracer()(method)
 
+
+# global var. This is not thread safe
+nesting = -1
+INDENT_WIDTH = '    '
+
+def get_indent():
+    return nesting * INDENT_WIDTH
+
+def increment_indent():
+    global nesting
+    nesting+=1
+
+def decrement_indent():
+    global nesting
+    nesting-=1
+
+import contextlib
+
+@contextlib.contextmanager
+def track_indent():
+    increment_indent()
+    try:
+        yield get_indent()
+    finally:
+        decrement_indent()
+
 class MethodTracer:
     def __init__(self, arg_fmt=None, ret_fmt=None, merge=False):
         self.merge = merge
@@ -53,35 +79,37 @@ class MethodTracer:
 
         # TODO: use functools.wrap
         def wrapper(*args, **kwargs):
-            if not self.merge:
-                print(self.format_start(method, args, kwargs))
-            try:
-                ret = method(*args, **kwargs)
-            except Exception as exc:
-                if self.merge:
-                    print(self.format_merged_exception(method, args, kwargs, exc))
-                else:
-                    print(self.format_exception(method, exc))
-                raise
+            with track_indent() as indent:
 
-            if self.merge:
-                print(self.format_merged(method, args, kwargs, ret))
-            else:
-                print(self.format_end(method, ret))
-            return ret
+                if not self.merge:
+                    print(self.format_start(method, args, kwargs, indent))
+                try:
+                    ret = method(*args, **kwargs)
+                except Exception as exc:
+                    if self.merge:
+                        print(self.format_merged_exception(method, args, kwargs, exc, indent))
+                    else:
+                        print(self.format_exception(method, exc, indent))
+                    raise
+
+                if self.merge:
+                    print(self.format_merged(method, args, kwargs, ret, indent))
+                else:
+                    print(self.format_end(method, ret, indent))
+                return ret
 
         return wrapper
 
-    def format_start(self, method, args, kwargs={}):
+    def format_start(self, method, args, kwargs={}, indent=''):
         return "%s(%s)" % (get_name(method), format_args(args, kwargs))
 
-    def format_end(self, method, ret):
+    def format_end(self, method, ret, indent=''):
         res = "<- %s(...)" % get_name(method)
         if ret is not None:
             res = "%r " % ret + res
         return res
 
-    def format_merged(self, method, args=(), kwargs={}, ret=None):
+    def format_merged(self, method, args=(), kwargs={}, ret=None, indent=''):
         return "%s(%s) -> %r" % (get_name(method), format_args(args, kwargs), ret)
 
         res = "<- %s(...)" % get_name(method)
@@ -89,11 +117,12 @@ class MethodTracer:
             res = "%r " % ret + res
         return res
 
-    def format_exception(self, method, exc):
+    def format_exception(self, method, exc, indent=''):
         return "%r %s %s(...)" % (exc, EXC[::-1], get_name(method))
 
-    def format_merged_exception(self, method, args, kwargs, exc):
-        return "%s(%s) %s %r" % (
+    def format_merged_exception(self, method, args, kwargs, exc, indent=''):
+        return "%s%s(%s) %s %r" % (
+            indent,
             get_name(method),
             format_args(args, kwargs),
             EXC,
