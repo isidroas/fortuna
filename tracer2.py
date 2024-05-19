@@ -37,8 +37,13 @@ def get_name(fn):
 
 EXC = "-X"
 
+def trace_method(method=None,*, arg_fmt=None, ret_fmt=None, merge=False):
+    if method is None:
+        return MethodTracer(arg_fmt=None, ret_fmt=None, merge=False)
+    else:
+        return MethodTracer()(method)
 
-class trace_method:
+class MethodTracer:
     def __init__(self, arg_fmt=None, ret_fmt=None, merge=False):
         self.merge = merge
         self.arg_fmt = arg_fmt
@@ -46,6 +51,7 @@ class trace_method:
 
     def __call__(self, method: Callable):
 
+        # TODO: use functools.wrap
         def wrapper(*args, **kwargs):
             if not self.merge:
                 print(self.format_start(method, args, kwargs))

@@ -20,6 +20,26 @@ class A:
     def foo(self, a, b, c=3):
         return a + b
 
+    @trace_method
+    def level1(self, a, b):
+        res = self.level2_not_interesting(a+b)
+        return self.level2_interesting(res)
+
+    # it allows you to ignore non-insteresting functions
+    def level2_not_interesting(self, c):
+        return self.level3(c)
+
+    @trace_method
+    def level3(self, c):
+        return c*2
+
+    @trace_method
+    def level2_interesting(self, c):
+        return c -1
+
+
+
+
 @pytest.fixture
 def method():
 
@@ -119,7 +139,7 @@ TypeError('can only concatenate str (not "int") to str') X- A.foo(...)
 
 
 def test_stdout_merged(method, capsys):
-    wrap = trace_method(merge=True)(method)
+    wrap = MethodTracer(merge=True)(method)
     wrap("one", " two")
     assert "A.foo('one', ' two') -> 'one two'\n" == capsys.readouterr().out
 
@@ -141,3 +161,13 @@ def test_stdout_property(capsys):
     with pytest.raises(ValueError):
         a.my_attr2=11
     assert "A.my_attr2=11 -X ValueError('should be less than 10')\n" == capsys.readouterr().out
+
+def test_stdout_indent(capsys):
+    a = A()
+    a.level1(2,3)
+    assert """
+A.level1(2, 3) -> ...
+   A.level3(6) -> 12
+   A.level2_interesting(12) -> 11
+11 <- A.level1(...)
+    """ == capsys.readouterr().out
