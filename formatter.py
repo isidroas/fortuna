@@ -44,12 +44,14 @@ class Trim(StrEnum):
     RIGHT = auto()
 
 
-def format_overflow(data: str, max_width, trim=Trim.LEFT):
+def format_overflow(data: str, max_width, trim=Trim.LEFT, print_total=False):
     """
     >>> format_overflow('3031323334', max_width = 10)
     '3031323334'
     >>> format_overflow('3031323334', max_width = 9)
     '<+4...>34'
+    >>> format_overflow('3031323334', max_width = 9, print_total=True)
+    '<=5...>34'
     >>> format_overflow('3031323334', max_width = 8)
     '<+5...>'
     >>> format_overflow('3031323334', max_width = 6)
@@ -75,7 +77,7 @@ def format_overflow(data: str, max_width, trim=Trim.LEFT):
     len_bytes, rest = divmod(len(data), 2)
     assert rest == 0, "not hexa"
 
-    fmt = "+{: >%d}" % len(str(len_bytes))
+    fmt = "%s{: >%d}" % ('=' if print_total else '+', len(str(len_bytes)))
     if trim == Trim.LEFT:
         fmt = '<%s...>' % fmt
     else:
@@ -97,9 +99,9 @@ def format_overflow(data: str, max_width, trim=Trim.LEFT):
 
     # print(visible)
     # print(len(fmt.format(0)))
-    trimmed_descriptor = fmt.format(len_bytes - visible_length_bytes)
+    trimmed_descriptor = fmt.format(len_bytes if print_total else len_bytes - visible_length_bytes)
     if trim == Trim.LEFT:
-        return trimmed_descriptor + data[len(data)-visible_length:]
+        return trimmed_descriptor + data[len(data)-visible_length:] # https://stackoverflow.com/questions/11337941/python-negative-zero-slicing
     elif trim == Trim.CENTER:
         # avoid unpair an hexa byte
         half, rest = divmod(visible_length_bytes, 2)
@@ -131,7 +133,7 @@ import string
 from functools import partial
 import re
 
-PATTERN = re.compile(r"(?P<align>=<|\^|>)?(?P<width>\d*)?X")
+PATTERN = re.compile(r"(?P<align><|\^|>)?(?P<alternate>#)?(?P<width>\d*)?X")
 
 
 class Formatter(string.Formatter):
@@ -148,7 +150,7 @@ class Formatter(string.Formatter):
                         "^": Trim.CENTER,
                         None: Trim.LEFT,
                     }[match.group("align")]
-                    value = format_overflow(value, int(width), align)
+                    value = format_overflow(value, int(width), align, print_total = match.group("alternate") is None)
         return super().format_field(value, format_spec)
 
 
@@ -170,8 +172,9 @@ def test_formatter():
     assert "0x0102" == fmt.format("0x{:X}", b"\x01\x02")
 
     b = bytes.fromhex("30313233343536373839")
-    assert "0x" + format_overflow(b.hex().upper(), 18) == fmt.format("0x{:18X}", b)
-    assert "0x" + format_overflow(b.hex().upper(), 18, 'right') == fmt.format("0x{:>18X}", b)
+    assert "0x" + format_overflow(b.hex().upper(), 18, print_total=True) == fmt.format("0x{:18X}", b)
+    assert "0x" + format_overflow(b.hex().upper(), 18, print_total=False) == fmt.format("0x{:#18X}", b)
+    assert "0x" + format_overflow(b.hex().upper(), 18, 'right', print_total=True) == fmt.format("0x{:>18X}", b)
 
 
 def test_regex():
@@ -181,7 +184,12 @@ def test_regex():
     m = PATTERN.match("50X")
     assert m.group("align") is None
     assert m.group("width") == "50"
-    # assert m.group('format') == 'X'
+    assert m.group("alternate") is None
+
+    m = PATTERN.match("<#50X")
+    assert m.group("align") == '<'
+    assert m.group("width") == "50"
+    assert m.group("alternate") == "#"
 
 from rich.highlighter import RegexHighlighter, _combine_regex
 class ReprHighlighter(RegexHighlighter):
@@ -193,7 +201,7 @@ class ReprHighlighter(RegexHighlighter):
         r'(?P<attrib_name>[\w_\.]{1,50})=(?P<attrib_value>"?[\w_]+"?)?',
         r"(?P<brace>[][{}()])",
         r"(?P<call>[\w.]*?)\(",
-        r"(?P<number>0x[a-fA-F0-9]*(\<\.*\+ *\d+ *\.*\>)?[a-fA-F0-9]*)",
+        r"(?P<number>0x[a-fA-F0-9]*(\<\.*[+=] *\d+ *\.*\>)?[a-fA-F0-9]*)",
         r"(?<![\\\w])(?P<str>b?'''.*?(?<!\\)'''|b?'.*?(?<!\\)'|b?\"\"\".*?(?<!\\)\"\"\"|b?\".*?(?<!\\)\")",
         # r"(?P<ellipsis>\.\.\.)",
         r"\b(?P<bool_true>True)\b|\b(?P<bool_false>False)\b|\b(?P<none>None)\b",

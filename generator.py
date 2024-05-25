@@ -26,7 +26,7 @@ def encrypt(key: bytes, counter: int) -> bytes:
     return _encrypt(key, counter.to_bytes(16, "little"))
 
 
-@trace_function(args_fmt=T('data=0x{data:25X}'), ret_fmt=T('0x{:25X}'), merge=True)
+@trace_function(args_fmt=T('data=0x{data:^25X}'), ret_fmt=T('0x{:25X}'), merge=True)
 def sha_double_256(data: bytes) -> bytes:
     return sha256(sha256(data).digest()).digest()
 
