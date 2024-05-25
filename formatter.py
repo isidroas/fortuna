@@ -48,8 +48,14 @@ def format_overflow(data: str, max_width, trim=Trim.LEFT):
     """
     >>> format_overflow('3031323334', max_width = 10)
     '3031323334'
+    >>> format_overflow('3031323334', max_width = 9)
+    '<+4...>34'
     >>> format_overflow('3031323334', max_width = 8)
-    '<+4..>34'
+    '<+5...>'
+    >>> format_overflow('3031323334', max_width = 6)
+    Traceback (most recent call last):
+    ValueError: even trimmed descriptor with length 7 does not fit in max width 6
+
     >>> format_overflow('3031323334', max_width = 9)
     '<+4...>34'
     >>> format_overflow('3031323334353637383930', max_width = 10)
@@ -70,22 +76,30 @@ def format_overflow(data: str, max_width, trim=Trim.LEFT):
     assert rest == 0, "not hexa"
 
     fmt = "+{: >%d}" % len(str(len_bytes))
-    visible_length = max_width - len(fmt.format(0))
-    dots = "..." if visible_length % 2 else ".."
     if trim == Trim.LEFT:
-        fmt = '<%s%s>' % (fmt, dots)
+        fmt = '<%s...>' % fmt
     else:
-        fmt = '<%s%s>' % (dots, fmt)
+        fmt = '<...%s>' % fmt
     visible_length = max_width - len(fmt.format(0))
 
+    if visible_length<0:
+        msg = 'even trimmed descriptor with length %d does not fit in max width %d' % (len(fmt.format(0)), max_width )
+        raise ValueError(msg)
+
     visible_length_bytes, rest = divmod(visible_length, 2)
-    assert rest == 0
+    # if max_width==6:
+    #     print(locals())
+        # breakpoint()
+    if rest :
+        # avoid unpair an hexa byte
+        visible_length -=1 
+        # downside: the whole max_width wont'b be leveraged
 
     # print(visible)
     # print(len(fmt.format(0)))
     trimmed_descriptor = fmt.format(len_bytes - visible_length_bytes)
     if trim == Trim.LEFT:
-        return trimmed_descriptor + data[-visible_length:]
+        return trimmed_descriptor + data[len(data)-visible_length:]
     elif trim == Trim.CENTER:
         # avoid unpair an hexa byte
         half, rest = divmod(visible_length_bytes, 2)
@@ -181,7 +195,7 @@ class ReprHighlighter(RegexHighlighter):
         r"(?P<call>[\w.]*?)\(",
         r"(?P<number>0x[a-fA-F0-9]*(\<\.*\+ *\d+ *\.*\>)?[a-fA-F0-9]*)",
         r"(?<![\\\w])(?P<str>b?'''.*?(?<!\\)'''|b?'.*?(?<!\\)'|b?\"\"\".*?(?<!\\)\"\"\"|b?\".*?(?<!\\)\")",
-        r"(?P<ellipsis>\.\.\.)",
+        # r"(?P<ellipsis>\.\.\.)",
         r"\b(?P<bool_true>True)\b|\b(?P<bool_false>False)\b|\b(?P<none>None)\b",
         r"(^|\s)(?P<ret_arrow>->)[\s$]",
         r"(^|\s)(?P<ret_exc>-X)\s",

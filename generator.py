@@ -32,7 +32,7 @@ def sha_double_256(data: bytes) -> bytes:
 
 
 class Generator(object):
-    key = TracedSet(T('0x{:50X}'))
+    key = TracedSet(T('0x{:^50X}'))
     counter = TracedSet()
     def __init__(self):
         self.key = b"\x00" * 32

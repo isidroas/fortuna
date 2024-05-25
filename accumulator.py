@@ -78,7 +78,7 @@ class Fortuna:
 
         return self.generator.pseudo_randomdata(nbytes)
 
-    @trace_function(args_fmt="source={source!r}, pool={pool}, data=0x{data:X}", merge=True)
+    @trace_function(args_fmt=T("source={source!r}, pool={pool}, data=0x{data:X}"), merge=True)
     def add_random_event(self, source: int, pool: int, data: bytes):
         assert 1 <= len(data) <= 32
         assert 0 <= source <= 255
