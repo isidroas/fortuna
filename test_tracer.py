@@ -79,12 +79,11 @@ def test_trace_method():
         method, args=("one",), kwargs={"b": 2}
     )
 
-    # -> 'hello'   # menos información, pero era redundante. Esta opción tiene todo el sentido como se empezó ...; Además con el highliter creo que queda espectacular y más sencillo porque todas apuntan a un mismo sentido
-    # <- 'hello'
     # 'hello' <-
     # 'hello' = A.foo(...)
     # 'hello' <- A.foo(...)
-    assert "-> 'hello'" == decorator.format_end(method, ret="hello")
+    # <- 'hello'
+    assert "-> 'hello'" == decorator.format_end(method, ret="hello")   # menos información, pero era redundante. Esta opción tiene todo el sentido como se empezó ...; Además con el highliter creo que queda espectacular y más sencillo porque todas apuntan a un mismo sentido
     assert "-> 5" == decorator.format_end(method, ret=5)
     assert "-> None" == decorator.format_end(method, ret=None)
 

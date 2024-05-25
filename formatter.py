@@ -181,18 +181,9 @@ class ReprHighlighter(RegexHighlighter):
         r"(?P<call>[\w.]*?)\(",
         r"(?P<number>0x[a-fA-F0-9]*(\.*\(\+\d+ *\)\.*)?[a-fA-F0-9]*)",
         r"(?<![\\\w])(?P<str>b?'''.*?(?<!\\)'''|b?'.*?(?<!\\)'|b?\"\"\".*?(?<!\\)\"\"\"|b?\".*?(?<!\\)\")",
-        # _combine_regex(
-        #     r"(?P<ipv4>[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})",
-        #     r"(?P<ipv6>([A-Fa-f0-9]{1,4}::?){1,7}[A-Fa-f0-9]{1,4})",
-        #     r"(?P<eui64>(?:[0-9A-Fa-f]{1,2}-){7}[0-9A-Fa-f]{1,2}|(?:[0-9A-Fa-f]{1,2}:){7}[0-9A-Fa-f]{1,2}|(?:[0-9A-Fa-f]{4}\.){3}[0-9A-Fa-f]{4})",
-        #     r"(?P<eui48>(?:[0-9A-Fa-f]{1,2}-){5}[0-9A-Fa-f]{1,2}|(?:[0-9A-Fa-f]{1,2}:){5}[0-9A-Fa-f]{1,2}|(?:[0-9A-Fa-f]{4}\.){2}[0-9A-Fa-f]{4})",
-        #     r"(?P<uuid>[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})",
-        #     r"(?P<call>[\w.]*?)\(",
-        #     r"\b(?P<bool_true>True)\b|\b(?P<bool_false>False)\b|\b(?P<none>None)\b",
-        #     r"(?P<ellipsis>\.\.\.)",
-        #     r"(?P<number_complex>(?<!\w)(?:\-?[0-9]+\.?[0-9]*(?:e[-+]?\d+?)?)(?:[-+](?:[0-9]+\.?[0-9]*(?:e[-+]?\d+)?))?j)",
-        #     r"(?P<number>(?<!\w)\-?[0-9]+\.?[0-9]*(e[-+]?\d+?)?\b|0x[a-fA-F0-9]*(\.*\(\+ *\d+\)\.*)?[a-fA-F0-9]*)",
-        #     r"(?P<path>\B(/[-\w._+]+)*\/)(?P<filename>[-\w._+]*)?",
-        #     r"(?P<url>(file|https|http|ws|wss)://[-0-9a-zA-Z$_+!`(),.?/;:&=%#~]*)",
-        # ),
+        r"(?P<ellipsis>\.\.\.)",
+        r"\b(?P<bool_true>True)\b|\b(?P<bool_false>False)\b|\b(?P<none>None)\b",
+        r"(^|\s)(?P<ret_arrow>->)[\s$]",
+        r"(^|\s)(?P<ret_exc>-X)\s",
+        # TODO: use _combine_regex as superclass?
     ]

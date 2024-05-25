@@ -30,9 +30,14 @@ def configure_logging_coloredlogs():
 
 def configure_logging():
     from rich.logging import RichHandler
+    from rich.theme import Theme
+    from rich.console import Console
     from formatter import ReprHighlighter
     import logdecorator
 
+    custom_theme = Theme({'repr.ret_arrow': 'blue', 'repr.ret_exc': 'bold red'})
+
+    console = Console(theme=custom_theme)
     # downside: it can not cofigured like the standard logging.Formatter (%(funcname)..)
     handler = RichHandler(
         rich_tracebacks=True,
@@ -41,6 +46,7 @@ def configure_logging():
         tracebacks_show_locals=True,
         tracebacks_suppress=[cmd, logdecorator],
         highlighter=ReprHighlighter(),
+        console=console,
         show_path=False, # it has less info using logdecorator. I can't overwirte %(module)s:%(lineno) even with functools.wrap
     )
     logging.basicConfig(
