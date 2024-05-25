@@ -167,7 +167,7 @@ class Cmd(cmd.Cmd):
     def do_print_pools(self, arg):
         from test_format import format_pools
 
-        print(format_pools(fortuna.pools, width=get_columns()))
+        print(format_pools(fortuna.pools, list(pool_counter.values()),  width=get_columns()))
 
     def complete_add_entropy(self, text, line, begidx, endidx):
         if not text:
