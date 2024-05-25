@@ -94,7 +94,8 @@ class FunctionTracer:
 
     def __call__(self, method: Callable):
 
-        logger = logging.getLogger(method.__qualname__ + '.tracer')
+        logger = logging.getLogger(method.__qualname__ + ".tracer")
+
         @functools.wraps(method)
         def wrapper(*args, **kwargs):
             with track_indent() as indent:
@@ -130,7 +131,7 @@ class FunctionTracer:
         )
 
     def format_end(self, method, ret, indent=""):
-        return '%s-> %s' % (indent, self.format_ret(ret))
+        return "%s-> %s" % (indent, self.format_ret(ret))
 
     def format_merged(self, method, args=(), kwargs={}, ret=None, indent=""):
         return "%s%s(%s) -> %s" % (
@@ -142,7 +143,6 @@ class FunctionTracer:
 
     def format_exception(self, method, exc, indent=""):
         return "{}-X {exc!r}".format(indent, exc=exc)
-    
 
     def format_merged_exception(self, method, args, kwargs, exc, indent=""):
         return "%s%s(%s) %s %r" % (
@@ -164,6 +164,7 @@ class FunctionTracer:
         if is_bounded:
             args = args[1:]
         return format_args(args, kwargs)
+
     def format_ret(self, ret):
         if self.ret_fmt is None:
             return repr(ret)
@@ -188,8 +189,8 @@ class TracedSetBase:
         self.owner = owner
 
     def __set__(self, obj, value):
-        logger = logging.getLogger(self.qualname + '.tracer')
-        with track_indent() as indent: # is uncommon property with child calls?
+        logger = logging.getLogger(self.qualname + ".tracer")
+        with track_indent() as indent:  # is uncommon property with child calls?
             try:
                 self.setter(obj, value)
             except Exception as exc:
@@ -200,10 +201,10 @@ class TracedSetBase:
     @abstractmethod
     def setter(self, obj, value): ...
 
-    def format_set(self, value, indent=''):
+    def format_set(self, value, indent=""):
         return "%s%s=%s" % (indent, self.qualname, self.format_value(value))
 
-    def format_exception(self, value, exc, indent=''):
+    def format_exception(self, value, exc, indent=""):
         return "%s%s=%r %s %r" % (indent, self.qualname, value, EXC, exc)
 
     def format_value(self, value):

@@ -83,7 +83,9 @@ def test_trace_method():
     # 'hello' = A.foo(...)
     # 'hello' <- A.foo(...)
     # <- 'hello'
-    assert "-> 'hello'" == decorator.format_end(method, ret="hello")   # menos información, pero era redundante. Esta opción tiene todo el sentido como se empezó ...; Además con el highliter creo que queda espectacular y más sencillo porque todas apuntan a un mismo sentido
+    assert "-> 'hello'" == decorator.format_end(
+        method, ret="hello"
+    )  # menos información, pero era redundante. Esta opción tiene todo el sentido como se empezó ...; Además con el highliter creo que queda espectacular y más sencillo porque todas apuntan a un mismo sentido
     assert "-> 5" == decorator.format_end(method, ret=5)
     assert "-> None" == decorator.format_end(method, ret=None)
 
@@ -96,7 +98,6 @@ def test_trace_method():
         method, args=("one", 2), ret=None
     )
 
-
     assert (
         "A.foo('one', 2) -X AssertionError('invalid')"
         == decorator.format_merged_exception(
@@ -108,16 +109,18 @@ def test_trace_method():
         method, exc=AssertionError("invalid")
     )
 
+
 def test_arg_formats():
     def func(a, b, c=3): ...
 
     method.__qualname__ = "A.foo"
-    t = FunctionTracer(args_fmt='b={b}')
-    assert "b=7" == t.format_args((5, ), {'b': 7}, func)
+    t = FunctionTracer(args_fmt="b={b}")
+    assert "b=7" == t.format_args((5,), {"b": 7}, func)
+
 
 def test_ret_format():
-    t = FunctionTracer(ret_fmt='{0:.3}')
-    assert '0.333' == t.format_ret(1/3)
+    t = FunctionTracer(ret_fmt="{0:.3}")
+    assert "0.333" == t.format_ret(1 / 3)
 
 
 def test_trace_function():
@@ -155,16 +158,19 @@ def test_stdout(caplog, reset_indent):
     a = A()
     method = a.foo2
 
-    with caplog.at_level(logging.DEBUG, logger='A.foo'):
+    with caplog.at_level(logging.DEBUG, logger="A.foo"):
         method("one", " two")
     assert "A.foo('one', ' two')" == caplog.records.pop(0).message
     assert "'one two' <- A.foo(...)" == caplog.records.pop(0).message
 
-    with (caplog.at_level(logging.DEBUG, logger='A.foo'), pytest.raises(TypeError)):
+    with caplog.at_level(logging.DEBUG, logger="A.foo"), pytest.raises(TypeError):
         method("one", 2)
 
     assert "A.foo('one', 2)" == caplog.records.pop(0).message
-    assert "TypeError('can only concatenate str (not \"int\") to str') X- A.foo(...)" == caplog.records.pop(0).message
+    assert (
+        "TypeError('can only concatenate str (not \"int\") to str') X- A.foo(...)"
+        == caplog.records.pop(0).message
+    )
 
 
 def test_stdout_merged(caplog, reset_indent):
@@ -173,29 +179,32 @@ def test_stdout_merged(caplog, reset_indent):
     a = A()
     method = a.foo2
 
-    with caplog.at_level(logging.DEBUG, logger='A.foo'):
+    with caplog.at_level(logging.DEBUG, logger="A.foo"):
         method("one", " two")
 
     assert "A.foo('one', ' two') -> 'one two'" == caplog.records.pop(0).message
 
-    with (caplog.at_level(logging.DEBUG, logger='A.foo'), pytest.raises(TypeError)):
+    with caplog.at_level(logging.DEBUG, logger="A.foo"), pytest.raises(TypeError):
         method("one", 2)
 
-    assert ("A.foo('one', 2) -X TypeError('can only concatenate str (not \"int\") to str')" == caplog.records.pop(0).message)
+    assert (
+        "A.foo('one', 2) -X TypeError('can only concatenate str (not \"int\") to str')"
+        == caplog.records.pop(0).message
+    )
 
 
 def test_stdout_property(caplog, reset_indent):
     a = A()
 
-    with caplog.at_level(logging.DEBUG, logger='A.my_attr'):
+    with caplog.at_level(logging.DEBUG, logger="A.my_attr"):
         a.my_attr = 3
     assert "A.my_attr=3" == caplog.records.pop(0).message
 
     a = A()
-    with caplog.at_level(logging.DEBUG, logger='A.my_attr2'):
+    with caplog.at_level(logging.DEBUG, logger="A.my_attr2"):
         a.my_attr2 = 3
     assert "A.my_attr2=3" == caplog.records.pop(0).message
-    with (caplog.at_level(logging.DEBUG, logger='A.my_attr2'), pytest.raises(ValueError)):
+    with caplog.at_level(logging.DEBUG, logger="A.my_attr2"), pytest.raises(ValueError):
         a.my_attr2 = 11
     assert (
         "A.my_attr2=11 -X ValueError('should be less than 10')"
@@ -207,15 +216,14 @@ def test_stdout_indent(caplog, reset_indent):
     # TODO: test property
     a = A()
 
-    with caplog.at_level(logging.DEBUG, logger='A'):
+    with caplog.at_level(logging.DEBUG, logger="A"):
         a.level1(2, 3)
 
-    assert (
-        """\
+    assert """\
 A.level1(2, 3)
     A.level3(5) -> 10
     A.level2_interesting(10) -> 9
 9 <- A.level1(...)\
-"""
-        == '\n'.join(record.message for record in  caplog.records) 
+""" == "\n".join(
+        record.message for record in caplog.records
     )

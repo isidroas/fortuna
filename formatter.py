@@ -77,31 +77,38 @@ def format_overflow(data: str, max_width, trim=Trim.LEFT, print_total=False):
     len_bytes, rest = divmod(len(data), 2)
     assert rest == 0, "not hexa"
 
-    fmt = "%s{: >%d}" % ('=' if print_total else '+', len(str(len_bytes)))
+    fmt = "%s{: >%d}" % ("=" if print_total else "+", len(str(len_bytes)))
     if trim == Trim.LEFT:
-        fmt = '<%s...>' % fmt
+        fmt = "<%s...>" % fmt
     else:
-        fmt = '<...%s>' % fmt
+        fmt = "<...%s>" % fmt
     visible_length = max_width - len(fmt.format(0))
 
-    if visible_length<0:
-        msg = 'even trimmed descriptor with length %d does not fit in max width %d' % (len(fmt.format(0)), max_width )
+    if visible_length < 0:
+        msg = "even trimmed descriptor with length %d does not fit in max width %d" % (
+            len(fmt.format(0)),
+            max_width,
+        )
         raise ValueError(msg)
 
     visible_length_bytes, rest = divmod(visible_length, 2)
     # if max_width==6:
     #     print(locals())
-        # breakpoint()
-    if rest :
+    # breakpoint()
+    if rest:
         # avoid unpair an hexa byte
-        visible_length -=1 
+        visible_length -= 1
         # downside: the whole max_width wont'b be leveraged
 
     # print(visible)
     # print(len(fmt.format(0)))
-    trimmed_descriptor = fmt.format(len_bytes if print_total else len_bytes - visible_length_bytes)
+    trimmed_descriptor = fmt.format(
+        len_bytes if print_total else len_bytes - visible_length_bytes
+    )
     if trim == Trim.LEFT:
-        return trimmed_descriptor + data[len(data)-visible_length:] # https://stackoverflow.com/questions/11337941/python-negative-zero-slicing
+        return (
+            trimmed_descriptor + data[len(data) - visible_length :]
+        )  # https://stackoverflow.com/questions/11337941/python-negative-zero-slicing
     elif trim == Trim.CENTER:
         # avoid unpair an hexa byte
         half, rest = divmod(visible_length_bytes, 2)
@@ -140,7 +147,7 @@ class Formatter(string.Formatter):
     def format_field(self, value, format_spec):
         if isinstance(value, (bytes, bytearray)):
             if match := PATTERN.search(format_spec):
-                format_spec = format_spec[:match.start()] + format_spec[match.end():]
+                format_spec = format_spec[: match.start()] + format_spec[match.end() :]
                 value = value.hex().upper()
                 if width := match.group("width"):
                     align = Trim.LEFT
@@ -150,7 +157,12 @@ class Formatter(string.Formatter):
                         "^": Trim.CENTER,
                         None: Trim.LEFT,
                     }[match.group("align")]
-                    value = format_overflow(value, int(width), align, print_total = match.group("alternate") is None)
+                    value = format_overflow(
+                        value,
+                        int(width),
+                        align,
+                        print_total=match.group("alternate") is None,
+                    )
         return super().format_field(value, format_spec)
 
 
@@ -172,9 +184,15 @@ def test_formatter():
     assert "0x0102" == fmt.format("0x{:X}", b"\x01\x02")
 
     b = bytes.fromhex("30313233343536373839")
-    assert "0x" + format_overflow(b.hex().upper(), 18, print_total=True) == fmt.format("0x{:18X}", b)
-    assert "0x" + format_overflow(b.hex().upper(), 18, print_total=False) == fmt.format("0x{:#18X}", b)
-    assert "0x" + format_overflow(b.hex().upper(), 18, 'right', print_total=True) == fmt.format("0x{:>18X}", b)
+    assert "0x" + format_overflow(b.hex().upper(), 18, print_total=True) == fmt.format(
+        "0x{:18X}", b
+    )
+    assert "0x" + format_overflow(b.hex().upper(), 18, print_total=False) == fmt.format(
+        "0x{:#18X}", b
+    )
+    assert "0x" + format_overflow(
+        b.hex().upper(), 18, "right", print_total=True
+    ) == fmt.format("0x{:>18X}", b)
 
 
 def test_regex():
@@ -187,11 +205,14 @@ def test_regex():
     assert m.group("alternate") is None
 
     m = PATTERN.match("<#50X")
-    assert m.group("align") == '<'
+    assert m.group("align") == "<"
     assert m.group("width") == "50"
     assert m.group("alternate") == "#"
 
+
 from rich.highlighter import RegexHighlighter, _combine_regex
+
+
 class ReprHighlighter(RegexHighlighter):
     """Copied from rich source"""
 
