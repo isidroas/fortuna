@@ -49,19 +49,19 @@ def format_overflow(data: str, max_width, trim=Trim.LEFT):
     >>> format_overflow('3031323334', max_width = 10)
     '3031323334'
     >>> format_overflow('3031323334', max_width = 8)
-    '(+4)..34'
+    '<+4..>34'
     >>> format_overflow('3031323334', max_width = 9)
-    '(+4)...34'
+    '<+4...>34'
     >>> format_overflow('3031323334353637383930', max_width = 10)
-    '(+10)...30'
+    '<+10...>30'
 
     >>> format_overflow('30313233343536373839', max_width = 18, trim='left')
-    '(+5 )...3536373839'
+    '<+ 5...>3536373839'
     >>> format_overflow('30313233343536373839', max_width = 18, trim='right')
-    '3031323334...(+5 )'
+    '3031323334<...+ 5>'
 
     >>> format_overflow('30313233343536373839', max_width = 18, trim='center')
-    '3031...(+5 )3839'
+    '303132<...+ 5>3839'
     """
     if len(data) <= max_width:
         return data
@@ -69,28 +69,28 @@ def format_overflow(data: str, max_width, trim=Trim.LEFT):
     len_bytes, rest = divmod(len(data), 2)
     assert rest == 0, "not hexa"
 
-    fmt = "(+{: <%d})" % len(str(len_bytes))
-    remaining = max_width - len(fmt.format(0))
-    dots = "..." if remaining % 2 else ".."
+    fmt = "+{: >%d}" % len(str(len_bytes))
+    visible_length = max_width - len(fmt.format(0))
+    dots = "..." if visible_length % 2 else ".."
     if trim == Trim.LEFT:
-        fmt += dots
+        fmt = '<%s%s>' % (fmt, dots)
     else:
-        fmt = dots + fmt
-    remaining = max_width - len(fmt.format(0))
+        fmt = '<%s%s>' % (dots, fmt)
+    visible_length = max_width - len(fmt.format(0))
 
-    remaining_bytes, rest = divmod(remaining, 2)
+    visible_length_bytes, rest = divmod(visible_length, 2)
     assert rest == 0
 
-    # print(remaining)
+    # print(visible)
     # print(len(fmt.format(0)))
-    remaining_info = fmt.format(len_bytes - remaining_bytes)
+    trimmed_descriptor = fmt.format(len_bytes - visible_length_bytes)
     if trim == Trim.LEFT:
-        return remaining_info + data[-remaining:]
+        return trimmed_descriptor + data[-visible_length:]
     elif trim == Trim.CENTER:
         # avoid unpair an hexa byte
-        half, rest = divmod(remaining_bytes, 2)
-        return data[: (half + rest) * 2] + remaining_info + data[-half * 2 :]
-    return data[:remaining] + remaining_info
+        half, rest = divmod(visible_length_bytes, 2)
+        return data[: (half + rest) * 2] + trimmed_descriptor + data[-half * 2 :]
+    return data[:visible_length] + trimmed_descriptor
 
 
 def format_pools(pools, sources=(), width=27):
@@ -179,7 +179,7 @@ class ReprHighlighter(RegexHighlighter):
         r'(?P<attrib_name>[\w_\.]{1,50})=(?P<attrib_value>"?[\w_]+"?)?',
         r"(?P<brace>[][{}()])",
         r"(?P<call>[\w.]*?)\(",
-        r"(?P<number>0x[a-fA-F0-9]*(\.*\(\+\d+ *\)\.*)?[a-fA-F0-9]*)",
+        r"(?P<number>0x[a-fA-F0-9]*(\<\.*\+ *\d+ *\.*\>)?[a-fA-F0-9]*)",
         r"(?<![\\\w])(?P<str>b?'''.*?(?<!\\)'''|b?'.*?(?<!\\)'|b?\"\"\".*?(?<!\\)\"\"\"|b?\".*?(?<!\\)\")",
         r"(?P<ellipsis>\.\.\.)",
         r"\b(?P<bool_true>True)\b|\b(?P<bool_false>False)\b|\b(?P<none>None)\b",

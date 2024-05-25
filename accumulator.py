@@ -118,7 +118,7 @@ class Fortuna:
             raise FortunaSeedFileError(msg)
         return s
 
-    @trace_function(args_fmt=T('"0x{data:50X}"'), merge=True)
+    @trace_function(args_fmt=T('0x{data:50X}'), merge=True)
     def _overwrite_seed_file(self, data):
         self.seed_file.seek(0)
         self.seed_file.write(data)
