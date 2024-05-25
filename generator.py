@@ -5,7 +5,7 @@ from hashlib import sha256
 LOG = logging.getLogger(__name__)
 from formatter import Template
 # from tracer import trace_method, trace_property, trace_function
-from tracer2 import trace_method, trace_property, trace_function, TracedSet
+from tracer import trace_method, trace_property, trace_function, TracedSet
 
 from formatter import Template as T
 

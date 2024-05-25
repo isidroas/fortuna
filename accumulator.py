@@ -9,7 +9,7 @@ from generator import Generator, sha_double_256
 from formatter import Template
 # from tracer import  trace_method, trace_property
 
-from tracer2 import trace_method, trace_property, trace_function, TracedSet
+from tracer import trace_method, trace_property, trace_function, TracedSet
 from formatter import Template as T
 
 MINPOOLSIZE = 64

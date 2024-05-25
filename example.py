@@ -165,7 +165,7 @@ class Cmd(cmd.Cmd):
             print(line)
 
     def do_print_pools(self, arg):
-        from test_format import format_pools
+        from formatter import format_pools
 
         print(format_pools(fortuna.pools, list(pool_counter.values()),  width=get_columns()))
 

@@ -1,7 +1,6 @@
 import itertools
 import logging
 
-# from tracer import trace_method
 from typing import Callable
 
 
