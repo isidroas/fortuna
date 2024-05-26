@@ -1,5 +1,5 @@
 import pytest
-from tracer import *
+from fortuna.tracer import *
 
 
 # TODO: put here static and class methods
@@ -44,9 +44,9 @@ class A:
 
 @pytest.fixture
 def reset_indent():
-    import tracer
+    import fortuna.tracer
 
-    tracer.nesting = -1
+    fortuna.tracer.nesting = -1
 
 
 @pytest.fixture

@@ -2,8 +2,8 @@ import io
 
 import pytest
 
-from accumulator import Fortuna, FortunaSeedFileError
-from generator import FortunaNotSeeded
+from fortuna import Fortuna, FortunaSeedFileError
+from fortuna.generator import FortunaNotSeeded
 
 # TODO: make test more unitary. Create fixture of Fortuna with preadded entrypy
 

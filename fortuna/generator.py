@@ -3,11 +3,11 @@ import math
 from hashlib import sha256
 
 LOG = logging.getLogger(__name__)
-from formatter import Template
-# from tracer import trace_method, trace_property, trace_function
-from tracer import trace_method, trace_property, trace_function, TracedSet
+from fortuna.formatter import Template
+# from fortuna.tracer import trace_method, trace_property, trace_function
+from fortuna.tracer import trace_method, trace_property, trace_function, TracedSet
 
-from formatter import Template as T
+from fortuna.formatter import Template as T
 
 from cryptography.hazmat.primitives import ciphers
 

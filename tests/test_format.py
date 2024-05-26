@@ -1,4 +1,4 @@
-from formatter import *
+from fortuna.formatter import *
 pools = [
         b'\x00',
         b'\x01\x02',
