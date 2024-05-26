@@ -1,4 +1,3 @@
-
 from enum import StrEnum, auto
 
 
@@ -80,8 +79,6 @@ def format_overflow(data: str, max_width, trim=Trim.LEFT, print_total=False):
     return data[:visible_length] + trimmed_descriptor
 
 
-
-
 import re
 import string
 
@@ -122,6 +119,3 @@ class Template(UserString):
     def format(self_, *args, **kwargs):
         fmt = Formatter()
         return fmt.format(str(self_), *args, **kwargs)
-
-
-

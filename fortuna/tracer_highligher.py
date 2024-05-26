@@ -1,6 +1,7 @@
 from rich.highlighter import RegexHighlighter
 from rich.theme import Theme
-# TODO: move Theme here 
+
+# TODO: move Theme here
 
 
 class ReprHighlighter(RegexHighlighter):
@@ -20,5 +21,6 @@ class ReprHighlighter(RegexHighlighter):
         r"(^|\s)(?P<ret_exc>-X)\s",
         # TODO: use _combine_regex as superclass?
     ]
+
 
 theme = Theme({"repr.ret_arrow": "blue", "repr.ret_exc": "bold red"})

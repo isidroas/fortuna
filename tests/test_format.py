@@ -77,6 +77,7 @@ def test_bytes_template():
     template = Template("0x{:8X}")
     assert "0x(+4)..35" == template.format(b"12345")
 
+
 def test_formatter():
     fmt = Formatter()
     assert "0x0102" == fmt.format("0x{:X}", b"\x01\x02")

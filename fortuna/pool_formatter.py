@@ -56,4 +56,3 @@ def format_pools(pools, sources=(), width=27):
             res += pointer_template.format(",".join(str(i) for i in sources_pointing))
         res += "\n"
     return res
-

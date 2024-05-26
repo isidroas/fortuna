@@ -35,7 +35,6 @@ def configure_logging():
     from fortuna.tracer_highligher import ReprHighlighter, theme
     import logdecorator
 
-
     console = Console(theme=theme)
     # downside: it can not cofigured like the standard logging.Formatter (%(funcname)..)
     handler = RichHandler(
