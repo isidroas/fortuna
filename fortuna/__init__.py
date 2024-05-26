@@ -7,6 +7,7 @@ from time import time
 import fortuna.generator
 from fortuna.generator import Generator, sha_double_256
 from fortuna.formatter import Template
+
 # from fortuna.tracer import  trace_method, trace_property
 
 from fortuna.tracer import trace_method, trace_property, trace_function, TracedSet
@@ -78,7 +79,9 @@ class Fortuna:
 
         return self.generator.pseudo_randomdata(nbytes)
 
-    @trace_function(args_fmt=T("source={source!r}, pool={pool}, data=0x{data:X}"), merge=True)
+    @trace_function(
+        args_fmt=T("source={source!r}, pool={pool}, data=0x{data:X}"), merge=True
+    )
     def add_random_event(self, source: int, pool: int, data: bytes):
         assert 1 <= len(data) <= 32
         assert 0 <= source <= 255
@@ -118,7 +121,7 @@ class Fortuna:
             raise FortunaSeedFileError(msg)
         return s
 
-    @trace_function(args_fmt=T('0x{data:50X}'), merge=True)
+    @trace_function(args_fmt=T("0x{data:50X}"), merge=True)
     def _overwrite_seed_file(self, data):
         self.seed_file.seek(0)
         self.seed_file.write(data)

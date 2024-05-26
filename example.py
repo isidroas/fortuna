@@ -28,6 +28,7 @@ def configure_logging_coloredlogs():
         fmt="%(name)10s.%(funcName)10s:%(lineno)3d %(levelname)s %(message)s",
     )
 
+
 def configure_logging():
     from rich.logging import RichHandler
     from rich.theme import Theme
@@ -35,7 +36,7 @@ def configure_logging():
     from fortuna.formatter import ReprHighlighter
     import logdecorator
 
-    custom_theme = Theme({'repr.ret_arrow': 'blue', 'repr.ret_exc': 'bold red'})
+    custom_theme = Theme({"repr.ret_arrow": "blue", "repr.ret_exc": "bold red"})
 
     console = Console(theme=custom_theme)
     # downside: it can not cofigured like the standard logging.Formatter (%(funcname)..)
@@ -47,7 +48,7 @@ def configure_logging():
         tracebacks_suppress=[cmd, logdecorator],
         highlighter=ReprHighlighter(),
         console=console,
-        show_path=False, # it has less info using logdecorator. I can't overwirte %(module)s:%(lineno) even with functools.wrap
+        show_path=False,  # it has less info using logdecorator. I can't overwirte %(module)s:%(lineno) even with functools.wrap
     )
     logging.basicConfig(
         level=logging.DEBUG,
@@ -167,7 +168,11 @@ class Cmd(cmd.Cmd):
     def do_print_pools(self, arg):
         from formatter import format_pools
 
-        print(format_pools(fortuna.pools, list(pool_counter.values()),  width=get_columns()))
+        print(
+            format_pools(
+                fortuna.pools, list(pool_counter.values()), width=get_columns()
+            )
+        )
 
     def complete_add_entropy(self, text, line, begidx, endidx):
         if not text:

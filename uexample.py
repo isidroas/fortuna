@@ -10,7 +10,8 @@ def configure_logging(events: u.ListBox):
     logging.basicConfig(level=logging.DEBUG, handlers=[handler])
     # Excluding urwid debug.
     # However, sometimes it is useful to see keypresses and their symbols
-    logging.getLogger('urwid').setLevel(logging.INFO)
+    logging.getLogger("urwid").setLevel(logging.INFO)
+
 
 class UrwidHandler(logging.Handler):
     def __init__(self, events: u.ListBox):
@@ -21,7 +22,11 @@ class UrwidHandler(logging.Handler):
         add_event(self.events, self.format(record))
 
     def format(self, record) -> u.Text:
-        color = {logging.WARNING: warning, logging.ERROR: error, logging.DEBUG: debug}.get(record.levelno, default)
+        color = {
+            logging.WARNING: warning,
+            logging.ERROR: error,
+            logging.DEBUG: debug,
+        }.get(record.levelno, default)
         text = "[%s] %s" % (record.levelname, record.msg)
         return u.Text((color, text))
 
@@ -62,7 +67,7 @@ old_random = u.AttrSpec(colors_256["light gray"], "default", 256)
 error = u.AttrSpec(colors_256["red"], "default", 256)
 warning = u.AttrSpec(colors_256["brown"], "default", 256)
 debug = old_random
-default = u.AttrSpec('default', "default", 256)
+default = u.AttrSpec("default", "default", 256)
 
 
 def create_top(
@@ -131,7 +136,6 @@ def main():
         )
     )
 
-
     configure_logging(events)
 
     help = u.Text(
@@ -169,6 +173,7 @@ def main():
     )
     loop.run()
     from logging_tree import printout
+
     printout()
 
 
