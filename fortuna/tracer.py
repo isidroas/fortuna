@@ -1,5 +1,9 @@
+import contextlib
+import functools
+import inspect
 import itertools
 import logging
+from abc import abstractmethod
 from typing import Callable
 
 
@@ -13,9 +17,6 @@ def format_args(args, kwargs):
             (repr(a) for a in args), (f"{k}={v!r}" for k, v in kwargs.items())
         )
     )
-
-
-import inspect
 
 
 def get_name(fn):
@@ -69,9 +70,6 @@ def increment_indent():
 def decrement_indent():
     global nesting
     nesting -= 1
-
-
-import contextlib
 
 
 @contextlib.contextmanager
@@ -174,9 +172,6 @@ class MethodTracer(FunctionTracer):
         return super().format_args(args[1:], kwargs, func)
 
 
-from abc import abstractmethod
-
-
 class TracedSetBase:
 
     def __init__(self, value_fmt=None):
@@ -229,9 +224,6 @@ class TracedSet(TracedSetBase):
 
     def setter(self, obj, value):
         setattr(obj, self.private_name, value)
-
-
-import functools
 
 
 class TracedSetWrapped(TracedSetBase):
