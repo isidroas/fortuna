@@ -6,8 +6,6 @@ from hashlib import sha256
 from cryptography.hazmat.primitives import ciphers
 
 from fortuna.formatter import Template as T
-
-# from fortuna.tracer import trace_method, trace_property, trace_function
 from fortuna.tracer import TracedSet, trace_function
 
 LOG = logging.getLogger(__name__)
