@@ -1,3 +1,6 @@
+from fortuna.byte_formatter import format_overflow
+
+
 def _get_sources(pool_index, sources):
     """
     >>> list(_get_sources(2, (1, 2, 0, 2)))
@@ -33,9 +36,6 @@ def _get_templates(n_pools, n_sources, width):
     template += "{: <%d}" % hex_width
 
     return template, pointer_template, hex_width
-
-
-from fortuna.byte_formatter import format_overflow
 
 
 def format_pools(pools, sources=(), width=27):

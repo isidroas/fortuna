@@ -1,3 +1,6 @@
+import re
+import string
+from collections import UserString
 from enum import StrEnum, auto
 
 
@@ -79,9 +82,6 @@ def format_overflow(data: str, max_width, trim=Trim.LEFT, print_total=False):
     return data[:visible_length] + trimmed_descriptor
 
 
-import re
-import string
-
 PATTERN = re.compile(r"(?P<align><|\^|>)?(?P<alternate>#)?(?P<width>\d*)?X")
 
 
@@ -106,9 +106,6 @@ class Formatter(string.Formatter):
                         print_total=match.group("alternate") is None,
                     )
         return super().format_field(value, format_spec)
-
-
-from collections import UserString
 
 
 class Template(UserString):
