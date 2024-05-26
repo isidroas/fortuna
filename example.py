@@ -63,8 +63,8 @@ class Source(enum.IntEnum):
     KEY_VALUE = 1
 
 
-from accumulator import Fortuna, FortunaSeedFileError, log_known_exception
-from generator import FortunaNotSeeded
+from fortuna import Fortuna, FortunaSeedFileError, log_known_exception
+from fortuna.generator import FortunaNotSeeded
 
 
 pool_counter = {

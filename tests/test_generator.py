@@ -1,4 +1,4 @@
-from generator import Generator, FortunaNotSeeded
+from fortuna.generator import Generator, FortunaNotSeeded
 import pytest
 
 
