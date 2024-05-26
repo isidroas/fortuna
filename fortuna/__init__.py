@@ -5,7 +5,7 @@ from pathlib import Path
 from time import time
 
 from fortuna import generator
-from fortuna.formatter import Template as T
+from fortuna.byte_formatter import Template as T
 from fortuna.generator import Generator, sha_double_256
 from fortuna.tracer import TracedSet, trace_function, trace_method
 

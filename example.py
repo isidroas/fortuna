@@ -31,14 +31,12 @@ def configure_logging_coloredlogs():
 
 def configure_logging():
     from rich.logging import RichHandler
-    from rich.theme import Theme
     from rich.console import Console
-    from fortuna.formatter import ReprHighlighter
+    from fortuna.tracer_highligher import ReprHighlighter, theme
     import logdecorator
 
-    custom_theme = Theme({"repr.ret_arrow": "blue", "repr.ret_exc": "bold red"})
 
-    console = Console(theme=custom_theme)
+    console = Console(theme=theme)
     # downside: it can not cofigured like the standard logging.Formatter (%(funcname)..)
     handler = RichHandler(
         rich_tracebacks=True,

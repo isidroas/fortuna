@@ -1,39 +1,3 @@
-def _get_sources(pool_index, sources):
-    """
-    >>> list(_get_sources(2, (1, 2, 0, 2)))
-    [1, 3]
-    """
-    try:
-        source = sources.index(pool_index)
-    except ValueError:
-        source = None
-
-    while source is not None:
-        yield source
-        try:
-            source = sources.index(pool_index, source + 1)
-        except ValueError:
-            source = None
-
-
-def _get_templates(n_pools, n_sources, width):
-    """
-    >>> template, pointer_template, _= _get_templates(5, 3, width=20)
-    >>> pointer_template
-    ' <- {: <5}'
-    >>> template
-    '{: <1}: 0x{: <6}'
-    """
-
-    pointer_template = (
-        (" <- {: <%d}" % len(",".join(" " * n_sources))) if n_sources else ""
-    )
-    template = "{: <%d}: 0x" % (2 if n_pools > 10 else 1)
-    hex_width = width - len(template.format("")) - len(pointer_template.format(""))
-    template += "{: <%d}" % hex_width
-
-    return template, pointer_template, hex_width
-
 
 from enum import StrEnum, auto
 
@@ -116,24 +80,6 @@ def format_overflow(data: str, max_width, trim=Trim.LEFT, print_total=False):
     return data[:visible_length] + trimmed_descriptor
 
 
-def format_pools(pools, sources=(), width=27):
-    """
-    format is:
-
-        number_of_pool: 0xCAFEE     <- source1, source2
-    """
-    template, pointer_template, hex_width = _get_templates(
-        len(pools), len(sources), width
-    )
-    res = ""
-    for index, pool in enumerate(pools):
-        data = pool.hex().upper()
-        res += template.format(index, format_overflow(data, hex_width))
-        sources_pointing = list(_get_sources(index, sources))
-        if sources_pointing:
-            res += pointer_template.format(",".join(str(i) for i in sources_pointing))
-        res += "\n"
-    return res
 
 
 import re
@@ -179,23 +125,3 @@ class Template(UserString):
 
 
 
-from rich.highlighter import RegexHighlighter
-
-
-class ReprHighlighter(RegexHighlighter):
-    """Copied from rich source"""
-
-    base_style = "repr."
-    highlights = [
-        r"(?P<tag_start><)(?P<tag_name>[-\w.:|]*)(?P<tag_contents>[\w\W]*)(?P<tag_end>>)",
-        r'(?P<attrib_name>[\w_\.]{1,50})=(?P<attrib_value>"?[\w_]+"?)?',
-        r"(?P<brace>[][{}()])",
-        r"(?P<call>[\w.]*?)\(",
-        r"(?P<number>0x[a-fA-F0-9]*(\<\.*[+=] *\d+ *\.*\>)?[a-fA-F0-9]*)",
-        r"(?<![\\\w])(?P<str>b?'''.*?(?<!\\)'''|b?'.*?(?<!\\)'|b?\"\"\".*?(?<!\\)\"\"\"|b?\".*?(?<!\\)\")",
-        # r"(?P<ellipsis>\.\.\.)",
-        r"\b(?P<bool_true>True)\b|\b(?P<bool_false>False)\b|\b(?P<none>None)\b",
-        r"(^|\s)(?P<ret_arrow>->)[\s$]",
-        r"(^|\s)(?P<ret_exc>-X)\s",
-        # TODO: use _combine_regex as superclass?
-    ]
