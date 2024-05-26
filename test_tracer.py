@@ -64,6 +64,11 @@ def prop():
 
 
 def test_trace_method():
+    """
+    Discarted idea: use of unicode
+        - in return ⏎ or ⮐  ⮑
+        - in exceptions  🛑 🚩
+    """
 
     def method(): ...
 
