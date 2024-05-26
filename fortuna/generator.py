@@ -3,14 +3,12 @@ import math
 from hashlib import sha256
 
 LOG = logging.getLogger(__name__)
-from fortuna.formatter import Template
-
-# from fortuna.tracer import trace_method, trace_property, trace_function
-from fortuna.tracer import trace_method, trace_property, trace_function, TracedSet
+from cryptography.hazmat.primitives import ciphers
 
 from fortuna.formatter import Template as T
 
-from cryptography.hazmat.primitives import ciphers
+# from fortuna.tracer import trace_method, trace_property, trace_function
+from fortuna.tracer import TracedSet, trace_function
 
 
 class FortunaNotSeeded(Exception): ...

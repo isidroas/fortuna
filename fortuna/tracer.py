@@ -1,6 +1,5 @@
 import itertools
 import logging
-
 from typing import Callable
 
 

@@ -136,9 +136,8 @@ def format_pools(pools, sources=(), width=27):
     return res
 
 
-import string
-from functools import partial
 import re
+import string
 
 PATTERN = re.compile(r"(?P<align><|\^|>)?(?P<alternate>#)?(?P<width>\d*)?X")
 
@@ -210,7 +209,7 @@ def test_regex():
     assert m.group("alternate") == "#"
 
 
-from rich.highlighter import RegexHighlighter, _combine_regex
+from rich.highlighter import RegexHighlighter
 
 
 class ReprHighlighter(RegexHighlighter):
