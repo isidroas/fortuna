@@ -1,14 +1,16 @@
+import contextlib
 import logging
 import math
 from hashlib import sha256
 
-LOG = logging.getLogger(__name__)
 from cryptography.hazmat.primitives import ciphers
 
 from fortuna.formatter import Template as T
 
 # from fortuna.tracer import trace_method, trace_property, trace_function
 from fortuna.tracer import TracedSet, trace_function
+
+LOG = logging.getLogger(__name__)
 
 
 class FortunaNotSeeded(Exception): ...
@@ -65,9 +67,6 @@ class Generator(object):
         r = self.generate_blocks(math.ceil(nbytes / 16))[:nbytes]
         self.key = self.generate_blocks(2)
         return r
-
-
-import contextlib
 
 
 @contextlib.contextmanager

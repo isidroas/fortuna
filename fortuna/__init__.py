@@ -1,8 +1,10 @@
+import contextlib
 import logging
 from io import IOBase
 from pathlib import Path
 from time import time
 
+from fortuna import generator
 from fortuna.formatter import Template as T
 from fortuna.generator import Generator, sha_double_256
 from fortuna.tracer import TracedSet, trace_function, trace_method
@@ -122,9 +124,6 @@ class Fortuna:
     def _overwrite_seed_file(self, data):
         self.seed_file.seek(0)
         self.seed_file.write(data)
-
-
-import contextlib
 
 
 @contextlib.contextmanager
