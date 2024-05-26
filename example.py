@@ -32,7 +32,7 @@ def configure_logging():
     from rich.logging import RichHandler
     from rich.theme import Theme
     from rich.console import Console
-    from formatter import ReprHighlighter
+    from fortuna.formatter import ReprHighlighter
     import logdecorator
 
     custom_theme = Theme({'repr.ret_arrow': 'blue', 'repr.ret_exc': 'bold red'})
