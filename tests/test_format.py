@@ -75,3 +75,33 @@ def test_bytes_template():
 
     template = Template("0x{:8X}")
     assert "0x(+4)..35" == template.format(b"12345")
+
+def test_formatter():
+    fmt = Formatter()
+    assert "0x0102" == fmt.format("0x{:X}", b"\x01\x02")
+
+    b = bytes.fromhex("30313233343536373839")
+    assert "0x" + format_overflow(b.hex().upper(), 18, print_total=True) == fmt.format(
+        "0x{:18X}", b
+    )
+    assert "0x" + format_overflow(b.hex().upper(), 18, print_total=False) == fmt.format(
+        "0x{:#18X}", b
+    )
+    assert "0x" + format_overflow(
+        b.hex().upper(), 18, "right", print_total=True
+    ) == fmt.format("0x{:>18X}", b)
+
+
+def test_regex():
+    m = PATTERN.match("50")
+    assert m is None
+
+    m = PATTERN.match("50X")
+    assert m.group("align") is None
+    assert m.group("width") == "50"
+    assert m.group("alternate") is None
+
+    m = PATTERN.match("<#50X")
+    assert m.group("align") == "<"
+    assert m.group("width") == "50"
+    assert m.group("alternate") == "#"
