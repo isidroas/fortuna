@@ -48,12 +48,12 @@ pools2 = [
 
 
 def test_overflow():
-    res = format_pools(pools2, [1, 0], width=20)
+    res = format_pools(pools2, [1, 0], width=21)
     assert (
         res
         == """\
-0: 0x00       <- 1  
-1: 0x(+4)..05 <- 0  
+0: 0x00        <- 1  
+1: 0x<+4...>05 <- 0  
 """
     )
 
@@ -74,8 +74,8 @@ def test_bytes_template():
     template = Template("0x{:X}")
     assert "0x12AB" == template.format(b"\x12\xab")
 
-    template = Template("0x{:8X}")
-    assert "0x(+4)..35" == template.format(b"12345")
+    template = Template("0x{:9X}")
+    assert "0x<=5...>35" == template.format(b"12345")
 
 
 def test_formatter():
