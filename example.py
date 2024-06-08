@@ -3,7 +3,6 @@ import contextlib
 import enum
 import logging
 import math
-import readline
 import subprocess
 import sys
 import termios
@@ -11,7 +10,7 @@ import textwrap
 import time
 import tty
 
-from fortuna import Fortuna, FortunaSeedFileError, log_known_exception
+from fortuna import Fortuna, log_known_exception
 from fortuna.generator import FortunaNotSeeded
 from fortuna.pool_formatter import format_pools
 
@@ -66,12 +65,10 @@ class Source(enum.IntEnum):
     KEY_VALUE = 1
 
 
-
 pool_counter = {
     Source.TIMESTAMP: 0,
     Source.KEY_VALUE: 0,
 }
-
 
 
 def get_columns():
