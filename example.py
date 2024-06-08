@@ -1,15 +1,19 @@
-import math
+import cmd
 import contextlib
 import enum
+import logging
+import math
+import readline
+import subprocess
 import sys
 import termios
-import tty
-import cmd
 import textwrap
-import logging
 import time
-import readline
+import tty
 
+from fortuna import Fortuna, FortunaSeedFileError, log_known_exception
+from fortuna.generator import FortunaNotSeeded
+from fortuna.pool_formatter import format_pools
 
 LOG = logging.getLogger(__name__)
 
@@ -30,10 +34,11 @@ def configure_logging_coloredlogs():
 
 
 def configure_logging():
-    from rich.logging import RichHandler
-    from rich.console import Console
-    from fortuna.tracer_highligher import ReprHighlighter, theme
     import logdecorator
+    from rich.console import Console
+    from rich.logging import RichHandler
+
+    from fortuna.tracer_highligher import ReprHighlighter, theme
 
     console = Console(theme=theme)
     # downside: it can not cofigured like the standard logging.Formatter (%(funcname)..)
@@ -61,16 +66,12 @@ class Source(enum.IntEnum):
     KEY_VALUE = 1
 
 
-from fortuna import Fortuna, FortunaSeedFileError, log_known_exception
-from fortuna.generator import FortunaNotSeeded
-
 
 pool_counter = {
     Source.TIMESTAMP: 0,
     Source.KEY_VALUE: 0,
 }
 
-import subprocess
 
 
 def get_columns():
@@ -163,7 +164,6 @@ class Cmd(cmd.Cmd):
             print(line)
 
     def do_print_pools(self, arg):
-        from formatter import format_pools
 
         print(
             format_pools(
