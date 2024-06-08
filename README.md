@@ -2,6 +2,13 @@ A didactic implementation of the Fortuna cryptographically secure pseudorandom n
 
 Examples only tested in Linux, but they should work also in macOS.
 
+```
+pip install .
+python example.py
+```
+
+!(./docs/screenshot.png)
+
 # Learn specification
 
 - https://en.wikipedia.org/wiki/Fortuna_(PRNG)
