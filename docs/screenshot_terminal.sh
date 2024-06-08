@@ -24,7 +24,7 @@ colors=(
     '-xrm' '*.background:#282828'
 )
 
-urxvt "${colors[@]}" +is -g 150x50 -b 0 +sb -name $CLASSNAME -fn "xft:FiraCode Nerd Font:pixelsize=20"  -e python example.py &
+urxvt "${colors[@]}" +is -g 150x41 -b 0 +sb -name $CLASSNAME -fn "xft:FiraCode Nerd Font:pixelsize=20"  -e python example.py &
 
 RXVTWINDOWID=$(xdotool search --sync --classname "$CLASSNAME")
 
