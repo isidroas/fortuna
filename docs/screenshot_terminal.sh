@@ -28,10 +28,13 @@ urxvt "${colors[@]}" +is -g 150x41 -b 0 +sb -name $CLASSNAME -fn "xft:FiraCode N
 
 RXVTWINDOWID=$(xdotool search --sync --classname "$CLASSNAME")
 
+xdotool key -window $RXVTWINDOWID ctrl+l
 xdotool type -window $RXVTWINDOWID add_entropy
 xdotool key -window $RXVTWINDOWID Return
 xdotool type -window $RXVTWINDOWID asdfjkl
 xdotool key -window $RXVTWINDOWID ctrl+c
+xdotool type -window $RXVTWINDOWID random
+xdotool key -window $RXVTWINDOWID Return
 
 import -window $RXVTWINDOWID $(dirname $0)/screenshot.png
 
