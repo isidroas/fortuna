@@ -7,7 +7,7 @@ pip install .
 python example.py
 ```
 
-!(./docs/screenshot.png)
+![screenshot](./docs/screenshot.png)
 
 # Learn specification
 
