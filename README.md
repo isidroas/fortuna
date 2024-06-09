@@ -1,6 +1,5 @@
 A didactic and minimal implementation of the Fortuna cryptographically secure pseudorandom number generator.
 
-
 ```
 $ pip install .
 $ python example.py
@@ -18,18 +17,20 @@ EOF  print_pools  print_seed_file  update_seed_file
 (fortuna) random
 ```
 
-In your terminal, a colored tracing will be displayed:
+In your terminal, colored traces will be displayed:
 
 ![screenshot](./docs/screenshot.png)
 
 The example has only been tested on Linux, but it should work on macOS as well.
 
-## Learn specification
+If you are only interested in the cryptography, the business logic is implemented in `fortuna/__init__.py` and `fortuna/generator.py`. The rest is for pretty logging purposes.
+
+## Specification
 
 - https://en.wikipedia.org/wiki/Fortuna_(PRNG)
 - https://www.schneier.com/academic/paperfiles/fortuna.pdf This is a chapter
-  part of the book `Cryptography Engineering`. Previous chapters will help you
-  to understand this one.
+  that is part of the book `Cryptography Engineering`. The previous chapters
+  will help you understand this one.
 
 ## Other implementations
 
