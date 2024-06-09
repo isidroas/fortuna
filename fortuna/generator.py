@@ -1,4 +1,3 @@
-import contextlib
 import logging
 import math
 from hashlib import sha256
@@ -36,7 +35,7 @@ def sha_double_256(data: bytes) -> bytes:
     return sha256(sha256(data).digest()).digest()
 
 
-class Generator(object):
+class Generator:
     key = TracedSet(T("0x{:^50X}"))
     counter = TracedSet()
 
@@ -65,11 +64,3 @@ class Generator(object):
         r = self.generate_blocks(math.ceil(nbytes / 16))[:nbytes]
         self.key = self.generate_blocks(2)
         return r
-
-
-@contextlib.contextmanager
-def log_known_exception():
-    try:
-        yield
-    except FortunaNotSeeded as e:
-        LOG.error(str(e))

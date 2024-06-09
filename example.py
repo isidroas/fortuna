@@ -10,54 +10,11 @@ import textwrap
 import time
 import tty
 
-from fortuna import Fortuna, log_known_exception
+from fortuna import Fortuna, FortunaSeedFileError
 from fortuna.generator import FortunaNotSeeded
 from fortuna.pool_formatter import format_pools
 
 LOG = logging.getLogger(__name__)
-
-
-def configure_logging_coloredlogs():
-    """
-    it seems not maintained. 3 years since  last change and interesting pull requests
-    TODO: try https://github.com/borntyping/python-colorlog
-    """
-    import coloredlogs
-
-    # coloredlogs.DEFAULT_LEVEL_STYLES = {'critical': {'bold': True, 'color': 'red'}, 'debug': {'color': 7}, 'error': {'color': 'red'}, 'info': {}, 'notice': {'color': 'magenta'}, 'spam': {'color': 'green', 'faint': True}, 'success': {'bold': True, 'color': 'green'}, 'verbose': {'color': 'blue'}, 'warning': {'color': 'yellow'}}
-    coloredlogs.DEFAULT_LEVEL_STYLES["debug"] = {"color": 7}
-    coloredlogs.install(
-        level="DEBUG",
-        fmt="%(name)10s.%(funcName)10s:%(lineno)3d %(levelname)s %(message)s",
-    )
-
-
-def configure_logging():
-    import logdecorator
-    from rich.console import Console
-    from rich.logging import RichHandler
-
-    from fortuna.tracer_highligher import ReprHighlighter, theme
-
-    console = Console(theme=theme)
-    # downside: it can not cofigured like the standard logging.Formatter (%(funcname)..)
-    handler = RichHandler(
-        rich_tracebacks=True,
-        # show_time = False,
-        log_time_format="[%X]",
-        tracebacks_show_locals=True,
-        tracebacks_suppress=[cmd, logdecorator],
-        highlighter=ReprHighlighter(),
-        console=console,
-        show_path=False,  # it has less info using logdecorator. I can't overwirte %(module)s:%(lineno) even with functools.wrap
-    )
-    logging.basicConfig(
-        level=logging.DEBUG,
-        handlers=[handler],
-        # format="%(relativeCreated)d %(message)s",
-        format="%(message)s",
-    )
-    logging.getLogger("urwid").setLevel(logging.INFO)
 
 
 class Source(enum.IntEnum):
@@ -69,6 +26,30 @@ pool_counter = {
     Source.TIMESTAMP: 0,
     Source.KEY_VALUE: 0,
 }
+
+
+def configure_logging():
+    from rich.console import Console
+    from rich.logging import RichHandler
+
+    from fortuna.tracer_highligher import ReprHighlighter, theme
+
+    console = Console(theme=theme)
+    handler = RichHandler(
+        rich_tracebacks=True,
+        show_time=False,
+        log_time_format="[%X]",
+        tracebacks_show_locals=True,
+        highlighter=ReprHighlighter(),
+        console=console,
+        show_path=False,  # it has less info using logdecorator. I can't overwirte %(module)s:%(lineno) even with functools.wrap
+    )
+    logging.basicConfig(
+        level=logging.DEBUG,
+        handlers=[handler],
+        # format="%(relativeCreated)d %(message)s",
+        format="%(message)s",
+    )
 
 
 def get_columns():
@@ -122,6 +103,14 @@ def add_entropy(source=Source.KEY_VALUE):
                 pool_counter[Source.TIMESTAMP] %= 32
 
 
+@contextlib.contextmanager
+def log_known_exception():
+    try:
+        yield
+    except (FortunaNotSeeded, FortunaSeedFileError) as e:
+        LOG.error(str(e))
+
+
 class Cmd(cmd.Cmd):
     prompt = "(fortuna) "
 
@@ -132,14 +121,10 @@ class Cmd(cmd.Cmd):
         nbytes = int(arg) if arg else 8
 
         # TODO: use this in all commands. Common place: cmd.Cmd.cmdloop. Also pop last frame from backtrace
-        try:
-            with log_known_exception():
-                # don't doing anything with the return value because library
-                # logging already displays it
-                fortuna.random_data(nbytes)
-        except:
-            # very useful: stack is the oposite than backtrace
-            LOG.exception("something bad while returning random")
+        with log_known_exception():
+            # don't doing anything with the return value because library
+            # logging already displays it
+            fortuna.random_data(nbytes)
 
     def do_add_entropy(self, arg):
         """
@@ -161,7 +146,6 @@ class Cmd(cmd.Cmd):
             print(line)
 
     def do_print_pools(self, arg):
-
         print(
             format_pools(
                 fortuna.pools, list(pool_counter.values()), width=get_columns()
@@ -179,7 +163,6 @@ class Cmd(cmd.Cmd):
 
 
 if __name__ == "__main__":
-    # fortuna.update_seed_file()
     configure_logging()
     fortuna = Fortuna(seed_file="./seed_file")
     Cmd().cmdloop()

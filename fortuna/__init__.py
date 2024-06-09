@@ -1,10 +1,8 @@
-import contextlib
 import logging
 from io import IOBase
 from pathlib import Path
 from time import time
 
-from fortuna import generator
 from fortuna.byte_formatter import Template as T
 from fortuna.generator import Generator, sha_double_256
 from fortuna.tracer import TracedSet, trace_function, trace_method
@@ -57,18 +55,22 @@ class Fortuna:
             except FortunaSeedFileEmpty:
                 LOG.info('seed file ("%s") is empty', seed_file)
 
+    @trace_method
+    def reseed_from_pools(self):
+        self.reseed_cnt += 1
+        s = bytearray()
+        for i in range(32):
+            if self.reseed_cnt % 2**i == 0:
+                s += sha_double_256(self.pools[i])
+                del self.pools[i][:]
+            else:
+                break  # optimization sugested by the book
+        self.generator.reseed(s)
+        self.last_seed = time()
+
     def random_data(self, nbytes: int):
         if len(self.pools[0]) >= MINPOOLSIZE and (time() - self.last_seed) > 0.1:
-            self.reseed_cnt += 1
-            s = bytearray()
-            for i in range(32):
-                if self.reseed_cnt % 2**i == 0:
-                    s += sha_double_256(self.pools[i])
-                    del self.pools[i][:]
-                else:
-                    break  # optimization sugested by the book
-            self.generator.reseed(s)
-            self.last_seed = time()
+            self.reseed_from_pools()
 
         # # this is 2 lines are from the pseoudocode of the book. Commented because:
         # #   - the exception will be already raised in generator.pseudo_randomdata
@@ -124,12 +126,3 @@ class Fortuna:
     def _overwrite_seed_file(self, data):
         self.seed_file.seek(0)
         self.seed_file.write(data)
-
-
-@contextlib.contextmanager
-def log_known_exception():
-    try:
-        with generator.log_known_exception():
-            yield
-    except FortunaSeedFileError as e:
-        LOG.error(str(e))
