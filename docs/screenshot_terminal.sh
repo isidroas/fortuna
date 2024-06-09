@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# # enough entropy need too many key strokes
+# dd if=/dev/random of=seed_file count=64 bs=1 > /dev/null
+rm seed_file
+
 CLASSNAME=$(head -c 6 /dev/urandom | base64 | tr -cd [:alnum:])
 
 # gruvbox colors
@@ -24,11 +28,30 @@ colors=(
     '-xrm' '*.background:#282828'
 )
 
-urxvt "${colors[@]}" +is -g 150x41 -b 0 +sb -name $CLASSNAME -fn "xft:FiraCode Nerd Font:pixelsize=20"  -e python example.py &
+urxvt -hold "${colors[@]}" +is -g 150x41 -b 0 +sb -name $CLASSNAME -fn "xft:FiraCode Nerd Font:pixelsize=20"  -e python example.py &
 
 RXVTWINDOWID=$(xdotool search --sync --classname "$CLASSNAME")
 
+xdotool type -window $RXVTWINDOWID 'add_entropy timestamp'
+xdotool key -window $RXVTWINDOWID Return
+for i in {1..10}; do
+    for i in {1..32}; do
+        xdotool type -window $RXVTWINDOWID a
+    done
+done
+# xdotool type -window $RXVTWINDOWID 0
+xdotool key -window $RXVTWINDOWID ctrl+c
+
+xdotool type -window $RXVTWINDOWID add_entropy
+xdotool key -window $RXVTWINDOWID Return
+for i in {1..26}; do
+    xdotool type -window $RXVTWINDOWID a
+done
+xdotool key -window $RXVTWINDOWID ctrl+c
+
 xdotool key -window $RXVTWINDOWID ctrl+l
+xdotool type -window $RXVTWINDOWID random
+xdotool key -window $RXVTWINDOWID Return
 xdotool type -window $RXVTWINDOWID add_entropy
 xdotool key -window $RXVTWINDOWID Return
 xdotool type -window $RXVTWINDOWID asdfjkl
@@ -36,6 +59,11 @@ xdotool key -window $RXVTWINDOWID ctrl+c
 xdotool type -window $RXVTWINDOWID random
 xdotool key -window $RXVTWINDOWID Return
 
-import -window $RXVTWINDOWID $(dirname $0)/screenshot.png
+sleep 0.1
+
+import -window $RXVTWINDOWID  /tmp/out.png
+
+# https://imagemagick.org/script/command-line-options.php#trim
+/tmp/ImageMagick/utilities/magick  /tmp/out.png -define trim:edges=south -trim $(dirname $0)/screenshot.png
 
 kill %1
