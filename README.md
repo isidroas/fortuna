@@ -15,7 +15,7 @@ Undocumented commands:
 ======================
 EOF  print_pools  print_seed_file  update_seed_file
 
-(fortuna)
+(fortuna) random
 ```
 
 In your terminal, a colored tracing will be displayed:
