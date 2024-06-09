@@ -35,10 +35,12 @@ def configure_logging():
     from fortuna.tracer_highligher import ReprHighlighter, theme
 
     console = Console(theme=theme)
+    # from fortuna import tracer
     handler = RichHandler(
         rich_tracebacks=True,
         show_time=False,
         log_time_format="[%X]",
+        # tracebacks_suppress=[tracer],
         tracebacks_show_locals=True,
         highlighter=ReprHighlighter(),
         console=console,
@@ -108,7 +110,9 @@ def log_known_exception():
     try:
         yield
     except (FortunaNotSeeded, FortunaSeedFileError) as e:
-        LOG.error(str(e))
+        # LOG.error(str(e))
+        # LOG.exception(e)
+        pass
 
 
 class Cmd(cmd.Cmd):
@@ -120,11 +124,9 @@ class Cmd(cmd.Cmd):
         """
         nbytes = int(arg) if arg else 8
 
-        # TODO: use this in all commands. Common place: cmd.Cmd.cmdloop. Also pop last frame from backtrace
-        with log_known_exception():
-            # don't doing anything with the return value because library
-            # logging already displays it
-            fortuna.random_data(nbytes)
+        # don't doing anything with the return value because library
+        # logging already displays it
+        fortuna.random_data(nbytes)
 
     def do_add_entropy(self, arg):
         """
@@ -160,6 +162,10 @@ class Cmd(cmd.Cmd):
         elif text in "timestamp":
             return ["timestamp"]
         return []
+
+    def onecmd(self, line):
+        with log_known_exception():
+            return super().onecmd(line)
 
 
 if __name__ == "__main__":
