@@ -3,8 +3,20 @@ A didactic implementation of the Fortuna cryptographically secure pseudorandom n
 Examples only tested in Linux, but they should work also in macOS.
 
 ```
-pip install .
-python example.py
+$ pip install .
+$ python example.py
+(fortuna)
+(fortuna) help
+
+Documented commands (type help <topic>):
+========================================
+add_entropy  help  random
+
+Undocumented commands:
+======================
+EOF  print_pools  print_seed_file  update_seed_file
+
+(fortuna)
 ```
 
 ![screenshot](./docs/screenshot.png)

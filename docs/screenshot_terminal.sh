@@ -39,7 +39,6 @@ for i in {1..10}; do
         xdotool type -window $RXVTWINDOWID a
     done
 done
-# xdotool type -window $RXVTWINDOWID 0
 xdotool key -window $RXVTWINDOWID ctrl+c
 
 xdotool type -window $RXVTWINDOWID add_entropy
@@ -64,6 +63,7 @@ sleep 0.1
 import -window $RXVTWINDOWID  /tmp/out.png
 
 # https://imagemagick.org/script/command-line-options.php#trim
-/tmp/ImageMagick/utilities/magick  /tmp/out.png -define trim:edges=south -trim $(dirname $0)/screenshot.png
+# you need a more recent version than 'ImageMagick 6.9.11-60 Q16 x86_64 2021-01-25' for the trim:edges
+convert  /tmp/out.png -define trim:edges=south -trim $(dirname $0)/screenshot.png
 
 kill %1
