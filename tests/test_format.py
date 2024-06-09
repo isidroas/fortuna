@@ -1,5 +1,5 @@
-from fortuna.pool_formatter import *
-from fortuna.byte_formatter import *
+from fortuna.formatters.pools import *
+from fortuna.formatters.bytes_formatter import *
 
 pools = [
     b"\x00",

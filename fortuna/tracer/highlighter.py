@@ -2,6 +2,7 @@ from rich.highlighter import RegexHighlighter
 from rich.style import Style
 from rich.theme import Theme
 
+
 class ReprHighlighter(RegexHighlighter):
     """Copied from rich source"""
 

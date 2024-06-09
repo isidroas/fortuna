@@ -10,9 +10,16 @@ import textwrap
 import time
 import tty
 
+
+from rich.console import Console
+from rich.logging import RichHandler
+
+
+
 from fortuna import Fortuna, FortunaSeedFileError
 from fortuna.generator import FortunaNotSeeded
-from fortuna.pool_formatter import format_pools
+from fortuna.formatters.pools import format_pools
+from fortuna.tracer import highlighter as tracer_highlighter
 
 LOG = logging.getLogger(__name__)
 
@@ -29,12 +36,7 @@ pool_counter = {
 
 
 def configure_logging():
-    from rich.console import Console
-    from rich.logging import RichHandler
-
-    from fortuna.tracer_highligher import ReprHighlighter, theme
-
-    console = Console(theme=theme)
+    console = Console(theme=tracer_highlighter.theme)
     # from fortuna import tracer
     handler = RichHandler(
         rich_tracebacks=True,
@@ -42,7 +44,7 @@ def configure_logging():
         log_time_format="[%X]",
         # tracebacks_suppress=[tracer],
         tracebacks_show_locals=True,
-        highlighter=ReprHighlighter(),
+        highlighter=tracer_highlighter.ReprHighlighter(),
         console=console,
         show_path=False,  # it has less info using logdecorator. I can't overwirte %(module)s:%(lineno) even with functools.wrap
     )

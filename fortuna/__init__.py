@@ -3,12 +3,9 @@ from io import IOBase
 from pathlib import Path
 from time import time
 
-from fortuna.byte_formatter import Template as T
+from fortuna.formatters.bytes_formatter import Template as T
 from fortuna.generator import Generator, sha_double_256
 from fortuna.tracer import TracedSet, trace_function, trace_method
-
-# from fortuna.tracer import  trace_method, trace_property
-
 
 MINPOOLSIZE = 64
 

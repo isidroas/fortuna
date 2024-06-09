@@ -1,4 +1,4 @@
-from fortuna.byte_formatter import format_overflow
+from fortuna.formatters.bytes_formatter import format_overflow
 
 
 def _get_sources(pool_index, sources):
