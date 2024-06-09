@@ -10,15 +10,12 @@ import textwrap
 import time
 import tty
 
-
 from rich.console import Console
 from rich.logging import RichHandler
 
-
-
 from fortuna import Fortuna, FortunaSeedFileError
-from fortuna.generator import FortunaNotSeeded
 from fortuna.formatters.pools import format_pools
+from fortuna.generator import FortunaNotSeeded
 from fortuna.tracer import highlighter as tracer_highlighter
 
 LOG = logging.getLogger(__name__)
@@ -111,7 +108,7 @@ def add_entropy(source=Source.KEY_VALUE):
 def log_known_exception():
     try:
         yield
-    except (FortunaNotSeeded, FortunaSeedFileError) as e:
+    except (FortunaNotSeeded, FortunaSeedFileError):
         # LOG.error(str(e))
         # LOG.exception(e)
         pass
