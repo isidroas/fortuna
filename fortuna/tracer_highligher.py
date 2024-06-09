@@ -1,8 +1,6 @@
 from rich.highlighter import RegexHighlighter
+from rich.style import Style
 from rich.theme import Theme
-
-# TODO: move Theme here
-
 
 class ReprHighlighter(RegexHighlighter):
     """Copied from rich source"""
@@ -18,9 +16,15 @@ class ReprHighlighter(RegexHighlighter):
         # r"(?P<ellipsis>\.\.\.)",
         r"\b(?P<bool_true>True)\b|\b(?P<bool_false>False)\b|\b(?P<none>None)\b",
         r"(^|\s)(?P<ret_arrow>->)[\s$]",
-        r"(^|\s)(?P<ret_exc>-X)\s",
+        r"(^|\s)(?P<ret_exc>-X)\s(?P<exc>\w+)?",
         # TODO: use _combine_regex as superclass?
     ]
 
 
-theme = Theme({"repr.ret_arrow": "blue", "repr.ret_exc": "bold red"})
+theme = Theme(
+    {
+        "repr.ret_arrow": Style(color="blue"),
+        "repr.ret_exc": Style(color="bright_red", bold=False),
+        "repr.exc": Style(color="bright_red", bold=True),
+    }
+)

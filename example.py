@@ -166,6 +166,7 @@ class Cmd(cmd.Cmd):
     def onecmd(self, line):
         with log_known_exception():
             return super().onecmd(line)
+        return False
 
 
 if __name__ == "__main__":
