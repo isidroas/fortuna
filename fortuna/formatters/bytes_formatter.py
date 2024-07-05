@@ -58,16 +58,11 @@ def format_overflow(data: str, max_width, trim=Trim.LEFT, print_total=False):
         raise ValueError(msg)
 
     visible_length_bytes, rest = divmod(visible_length, 2)
-    # if max_width==6:
-    #     print(locals())
-    # breakpoint()
     if rest:
         # avoid unpair an hexa byte
         visible_length -= 1
-        # downside: the whole max_width wont'b be leveraged
+        # downside: the whole max_width won't be leveraged
 
-    # print(visible)
-    # print(len(fmt.format(0)))
     trimmed_descriptor = fmt.format(
         len_bytes if print_total else len_bytes - visible_length_bytes
     )

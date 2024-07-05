@@ -123,7 +123,7 @@ class Cmd(cmd.Cmd):
         """
         nbytes = int(arg) if arg else 8
 
-        # don't doing anything with the return value because library
+        # Not doing anything with the return value because library
         # logging already displays it
         fortuna.random_data(nbytes)
 
